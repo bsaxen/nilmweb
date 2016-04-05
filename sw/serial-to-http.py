@@ -1,26 +1,18 @@
 #!/usr/bin/python
 #==================================================
 # serial-to-http.py
+# 2016-04-05
 #==================================================
 # apt-get install python-pip
 # pip install pyserial
-#==================================================
-# History
-#==================================================
-# 2015-12-28: changed defualt name of sxn_name
-# 2016-01-09: Support for global configration server
-#==================================================
-#swid = N/A
-#devid = N/A
 import serial
 import httplib
 import os
-#import time
 
 #==================================================
 # Read configuration
 #==================================================
-print 'Version 2016-01-09'
+print 'Version 2016-04-05'
 sxn_debug = 'YES';
 sxn_server = '78.67.160.17'
 sxn_sercon = 'config.nabton.com'
@@ -65,7 +57,6 @@ file = open('ipaddress.work','r')
 for line in file:
     if 'Bcast' in line:
         words=line.split(' ')
-        #print words
         work=words[11].split(':')
         sxn_ipaddress = work[1] 
         print 'local ipaddress ' + sxn_ipaddress

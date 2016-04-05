@@ -1,17 +1,12 @@
+//==================================================
+// SW-13-ESP8266-nilm.ino
+// 2016-04-05
+//==================================================
 #include <ESP8266WiFi.h>
-//==================================================
-// sxn_ESP8266_elvis.ino
-// 2015-12-27
-//==================================================
-//History
-//==================================================
-
-// char* ssid     = "bridge";
-//const char* password = "6301166614";
-const char* ssid     = "TeliaGateway30-91-8F-2B-51-83";
-const char* password = "C150C3A2F2";
-const char* host = "78.67.160.17";
-const char* clientName = "ESPInterrupt";
+const char* ssid     = "???";
+const char* password = "???";
+const char* host = "server ip address";
+const char* clientName = "SW-13";
 IPAddress ipAddress;
 
 const int PIN_INTERRUPT  = 4;
@@ -33,6 +28,7 @@ unsigned long time1, time2, data;
 #define SID8 908
 int g_device_delay = 20;
 int g_debug = 0;
+int app_id = 13;
 //==================================================
 // This code supports 2 decimals only
 #define NFLOAT 2  // No of decimals i float value
@@ -65,7 +61,7 @@ void NB_sendFloatData(int sid, float value)
     }
  
     String urlPath        = "/sxndata/index.php";
-    String arduinoSim     = "?mid=1&nsid="+String(SIDN)+"&sid1="+String(sid)+"&dat1="+String(sValue);
+    String arduinoSim     = "?sw="+String(app_id)+"&mid=1&nsid="+String(SIDN)+"&sid1="+String(sid)+"&dat1="+String(sValue);
     String nameString     = "&name=" + String(clientName);;
     String ipString       = "&ip=" + String(g_sIp);
  

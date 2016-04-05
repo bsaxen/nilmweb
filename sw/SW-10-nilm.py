@@ -1,6 +1,7 @@
+#!/usr/bin/python
 #==================================================
-# sxn_elvis.py
-# 2015-12-28 
+# SW-10-nilm.py
+# 2016-04-05 
 #==================================================
 import time
 import datetime
@@ -32,19 +33,19 @@ dp = 0
 #==================================================
 # Configuration
 #==================================================
-sid        = 5
+app_id      = 10
+sid        = 901
 boti       = 100
-nb_server  = '78.67.160.17'
+ip_server  = 'server ip address'
 log_local  = 1
 log_server = 1
-sxn_name   = 'El-Kil'
+meas_name  = 'measurement tag'
 #==================================================
 os.system("ifconfig > ipaddress.work")
 file = open('ipaddress.work','r')
 for line in file:
     if 'Bcast' in line:
         words=line.split(' ')
-        #print words
         work=words[11].split(':')
         sxn_ipaddress = work[1] 
         print 'local ipaddress ' + sxn_ipaddress
@@ -60,16 +61,12 @@ def pulseEvent(x):
 	if log_server == 1:
 		GPIO.output(18,True)
 		p1 = time.time()
-		conn = httplib.HTTPConnection(nb_server)
-		#t_req = "/nabton/NDSServer/NDSCollector.php?mid=1&sid=%d&data=%.2f" % (sid,elpow)
-		t_req = "/sxndata/index.php?mid=1&name=%s&ip=%s&nsid=1&sid1=%d&dat1=%.2f" % (sxn_name,sxn_ipaddress,sid,elpow)
+		conn = httplib.HTTPConnection(ip_server)
+		t_req = "/sxndata/index.php?sw=%d&mid=1&name=%s&ip=%s&nsid=1&sid1=%d&dat1=%.2f" % (app_id,meas_name,sxn_ipaddress,sid,elpow)
 		try:
 			conn.request("GET", t_req)
 			try:
 				r1 = conn.getresponse()
-				#print ("x%sx z%sz " % (r1.status, r1.reason))
-				#data1 = r1.read()
-				#print data1
 				if r1.status == 200:
 					GPIO.output(18,False)
 			except:
@@ -90,8 +87,6 @@ def pulseEvent(x):
 			out_file.write("%s %.3f %.3f %s\n" % (ts,elpow,dp,nb_warning))
 			out_file.close()
 			GPIO.output(12,False)
-			
-	#print("interrupt detected: %8.3f Power: %.3f Mode: %d,%d Answ=%.3f" % (dt,elpow,log_local,log_server,dp))
 
 #==================================================
 # Interrupt
@@ -102,7 +97,6 @@ while True:
 		today = datetime.date.today()
 		log_file = "data-%d-%s.nbc" % (sid,today)
 		time.sleep(1)
-		#print "Wait"
 	except KeyboardInterrupt:
 		GPIO.cleanup()
 		quit()

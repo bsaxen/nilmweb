@@ -1,12 +1,6 @@
 //==================================================
-// sxn_temperature.ino
-//==================================================
-// History
-//==================================================
-// 2015-11-21: First version
-// 2015-12-15: Improved sending to RPi
-// 2015-12-18: Increased stepper resolution, corrected NB_sendToGateway
-// 2016-03-28: Generic number of sensors. Scrolling display of data
+// SW-12-temperature.ino
+// 2016-04-05
 //==================================================
 #define NFLOAT 2  // No of decimals i float value
 #define SIDN 4    // No of SIDs
@@ -19,6 +13,7 @@
 #define SID7 907
 #define SID8 908
 int g_debug = 0;
+int app_id = 12;
 //==================================================
 #define MAX_SID 10
 #define MAX_ORDERS 100
@@ -64,7 +59,6 @@ int g_device_delay = 10;
 #include <OneWire.h>
 #include <DallasTemperature.h>
 #include <SoftwareSerial.h>
-//#include <IRremote.h>
 #include <U8glib.h>
 
 //=================================================
@@ -138,7 +132,7 @@ int NB_sendToGwy(int mid, int sid, float data, int other)
      strcpy(msg2," ");
      digitalWrite(5,HIGH);
      // Mandatory part of message
-     sprintf(msg1,"?mid=%d&nsid=%d&sid1=%d",mid,1,sid);
+     sprintf(msg1,"?sw=%d&mid=%d&nsid=%d&sid1=%d",app_id,mid,1,sid);
 if(g_debug==1){Serial.print("data:");Serial.println(data);}      
      if(mid == NABTON_DATA)
      {
@@ -285,8 +279,6 @@ void setup()
   g_sids[7] = SID7;
   g_sids[8] = SID8;
   
-  //sprintf(dl[1],"%d",SWID);
-  //sprintf(dm[1],"%d",DEVID);
   sprintf(dr[1],"%d",g_device_delay);
   for(i=1;i<=SIDN;i++)
   {

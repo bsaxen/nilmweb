@@ -1,14 +1,6 @@
 //==================================================
-// sxn_temperature_ethShield.ino
-//==================================================
-// History
-//==================================================
-// Software Id: 41001 2015-11-21  First version
-// 2015-12-18: increased stepper resolution, corrected NB_sendToGateway
-// 2015-12-28: Added name and ip in url
-// 2016-01-06: Configurable server ip address
-// 2016-01-08: Central configuration
-// 2016-03-28: Config support
+// SW-14-ethShield-temperature.ino
+// 2016-04-05
 //==================================================
 #define NFLOAT 2  // No of decimals i float value
 #define NSID  2   // No of SIDs
@@ -21,6 +13,7 @@
 #define SID7 907
 #define SID8 908
 int g_debug = 1;
+int app_id= 14;
 const char* g_clientName = "ArduinoEthShield-test";
 int g_device_delay = 3;
 //==================================================
@@ -215,7 +208,7 @@ int NB_sendToGwy(int mid, int sid, float data, int other)
      strcpy(msg2," ");
      digitalWrite(LED_SEND_DATA,HIGH);
      // Mandatory part of message
-     sprintf(msg1,"GET /sxndata/index.php?mid=%d&nsid=%d&sid1=%d",mid,1,sid);
+     sprintf(msg1,"GET /sxndata/index.php?sw=%d&mid=%d&nsid=%d&sid1=%d",app_id,mid,1,sid);
 if(g_debug==1){Serial.print("data:");Serial.println(data);}      
      if(mid == NABTON_DATA)
      {

@@ -1,10 +1,6 @@
 //==================================================
-// sxn_stepper.ino
-//==================================================
-// History
-//==================================================
-// Software Id: 11201 2015-12-11	First version
-// 2015-12-18: increased stepper resolution, corrected NB_sendToGateway
+// SW-11-stepper.ino
+// 2015-12-18
 //==================================================
 #define SWID 2015
 #define DEVID 1209 
@@ -20,9 +16,8 @@
 #define SID7 907
 #define SID8 908
 int g_debug = 0;
-// Fixed part of configuration
+int app_id = 11;
 
-// Arduino states
 #define MAX_SID 10
 #define MAX_ORDERS 100
 int g_sids[10] = {SIDN,SID1,SID2,SID3,SID4,SID5,SID6,SID7,SID8};
@@ -176,7 +171,7 @@ int NB_sendToGwy(int mid, int sid, float data, int other)
      strcpy(msg2," ");
      digitalWrite(5,HIGH);
      // Mandatory part of message
-     sprintf(msg1,"?mid=%d&nsid=%d&sid1=%d",mid,1,sid);
+     sprintf(msg1,"?sw=%d&mid=%d&nsid=%d&sid1=%d",app_id,mid,1,sid);
 if(g_debug==1){Serial.print("data:");Serial.println(data);}      
      if(mid == NABTON_DATA)
      {

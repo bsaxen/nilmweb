@@ -1,20 +1,13 @@
-#include <ESP8266WiFi.h>
-#include <SoftwareSerial.h>
 //==================================================
 // serial-to-wifi-ESP8266.ino
+// 2016-04-05
 //==================================================
-//History
-//==================================================
-// 2015-12-28:  ssid and password to Telia
-// TBD: fix connection to Arduino
-//==================================================
-
+#include <ESP8266WiFi.h>
+#include <SoftwareSerial.h>
 SoftwareSerial adam(4,5 ); // RX, TX
-//const char* ssid     = "bridge";
-//const char* password = "6301166614";
-const char* ssid     = "TeliaGateway30-91-8F-2B-51-83";
-const char* password = "C150C3A2F2";
-const char* host = "78.67.160.17";
+const char* ssid     = "gateway ssid";
+const char* password = "wifi pswd";
+const char* host = "server ip address";
 IPAddress ipAddress;
 
 
@@ -24,8 +17,6 @@ void setup() {
   Serial.begin(115200);
   local.begin(9600);
   delay(10);
-
-  // We start by connecting to a WiFi network
 
   Serial.println();
   Serial.println();
