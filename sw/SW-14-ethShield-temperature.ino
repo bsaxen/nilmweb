@@ -1,6 +1,17 @@
 //==================================================
 // SW-14-ethShield-temperature.ino
-// 2016-04-06
+// 2016-04-08
+//==================================================
+int app_id = 14;
+//==================================================
+// Configuration
+//==================================================
+int g_debug              = 0;
+const char* g_clientName = "SW-14";
+const char* g_confServer = "sercon.simuino.com";
+
+byte mac[] = { 0xDE, 0xAD, 0xBE, 0xEF, 0xFE, 0xED };
+int g_device_delay       = 3;
 //==================================================
 #define NFLOAT 2  // No of decimals i float value
 #define NSID  2   // No of SIDs
@@ -17,21 +28,12 @@
 #define yellowLed 12
 #define redLed     5
 
-int g_debug = 1;
-int app_id= 14;
-const char* g_clientName = "Nytomta_temp";
-int g_device_delay = 3;
-//==================================================
 #define MAX_SID 8
-//#define MAX_ORDERS 100
-byte mac[] = { 0xDE, 0xAD, 0xBE, 0xEF, 0xFE, 0xED };
-//char g_confServer[] = "192.168.1.97"; 
-char g_confServer[80] ; 
-char g_server[80]; 
+char g_server[120]; 
 int  g_sids[10] = {NSID,SID1,SID2,SID3,SID4,SID5,SID6,SID7,SID8};
 char g_sIp[80];
 char g_rbuf[4000];
-int g_device_state = 0;
+int  g_device_state = 0;
   
 // Arduino-RPi protocol
 #define NABTON_DATA     1 
@@ -43,7 +45,7 @@ int g_device_state = 0;
 #define S_NETWORK    3
 #define S_INTERNET   4
 #define S_CONFIGURED 5
-#define S_RUNNING    6
+#define S_RUNNING    6 
 //=================================================
 //
 // D0 RX used for serial communication to server (Raspberry Pi)
@@ -146,7 +148,7 @@ void draw()
   u8g.drawStr( 0, 45, dl[3]);
   u8g.drawStr( 0, 62, dl[4]);
 
-  u8g.drawStr( 99, 10, dm[1]);
+  u8g.drawStr( 45, 10, dm[1]);
   u8g.drawStr( 99, 27, dm[2]);
   u8g.drawStr( 99, 45, dm[3]);
   u8g.drawStr( 45, 62, dm[4]);
@@ -226,7 +228,7 @@ if(g_debug==1){Serial.print("part2:");Serial.println(part2);}
        strcat(msg1,msg2);
      }
 
-    digitalWrite(redLed,LOW);
+
     sprintf(dr[4],"S-");
     client.stop();
     if(client.connect(g_server, 80))
@@ -270,8 +272,6 @@ void setup()
   pinMode(4, OUTPUT);
   digitalWrite(4, HIGH);
 
-  strcpy(g_confServer,"sercon.simuino.com");
-  
   Serial.begin(9600);
   //NB_serialFlush();
 
@@ -367,7 +367,7 @@ void setup()
 if(g_device_state == S_NETWORK)
 {
 // ====== Get global configuration data ========
-     //digitalWrite(LED_CONFIGURED,LOW);
+
  
      Serial.print("URL for config: ");Serial.println(g_confServer);
      int res = client.connect(g_confServer, 80);
@@ -419,7 +419,7 @@ if(g_device_state == S_NETWORK)
 
 // ====== End global configuration data ========
 } // end while
-
+  sprintf(dm[1],"%3d",g_device_delay);
   NB_oledDraw();
   delay(1000);
   
@@ -428,15 +428,21 @@ if(g_device_state == S_NETWORK)
 void loop()
 //=================================================
 {
-    int i,j,nbytes,count;
+    int i,j,nbytes,count,itemp,x;
     float tempC;
     char c='1';
     char *p;
     char *str;
-
+    char stemp1[40],stemp2[40],stemp3[40];
+    String S_buf;
+    sprintf(dm[1],"%3d",g_device_delay);
+    sprintf(dl[3],"%s",g_server);
+    //sprintf(dl[3],"delay %d",g_device_delay);
+    strcpy(g_rbuf," ");
     sensors.requestTemperatures();
     for(j=0;j<nsensors;j++)
     {
+  
       sprintf(dl[4],"%3d",g_sids[j+1]);
       tempC = sensors.getTempCByIndex(j);
       dtostrf(tempC,5, NFLOAT, dm[4]);
@@ -445,28 +451,45 @@ void loop()
       
       //Check for any message from mailbox in server 
       nbytes = client.available();
-      //Serial.print(nbytes); 
-      count = 0;
-      
-      for(i=0;i<nbytes;i++) 
+      //count = 0;
+      //S_buf[count] = '\0';
+      if(nbytes > 0)
       {
-         c = client.read();
-         //Serial.print(c);
-         g_rbuf[count] = c;
-         count++;
+            digitalWrite(redLed,LOW);
+            for(i=0;i<nbytes;i++) 
+            {
+               c = client.read();
+               //Serial.print(c);
+               S_buf += String(c);
+               //count++;
+            }
       }
-      g_rbuf[count] = '\0';
-      Serial.print("-"); 
-      Serial.print(g_rbuf);
-      Serial.println("*"); 
-      if(strstr(g_rbuf,"DATA") != NULL) blinkLed(yellowLed,nbytes,20);
-      if(strstr(g_rbuf,"CONFIG") != NULL)
+      S_buf.trim();
+      //S_buf[count] = '\0';
+      //Serial.println(S_buf.length());
+      //Serial.print("-"); 
+      //Serial.print(S_buf);
+      //Serial.println("*"); 
+      if(S_buf.indexOf("DATA") != -1) blinkLed(yellowLed,1,50);
+      if(S_buf.indexOf("DELAY") != -1)
       {
-        blinkLed(greenLed,5,500);
+        x = S_buf.indexOf("DELAY");x = x+6;
+        String Stemp = S_buf.substring(x);
+        //Serial.println(Stemp);
+        g_device_delay = S_buf.substring(x).toInt();
+        blinkLed(greenLed,3,100);
+        digitalWrite(greenLed,HIGH);
+      }
+
+      if(S_buf.indexOf("CONFIG") != -1)
+      {
+        blinkLed(greenLed,5,200);
         software_Reset();
       }
-      strcpy(g_rbuf," ");
 
+      S_buf.substring(15,30).toCharArray(stemp1,15);
+      sprintf(dl[3],"%s",stemp1);
+   
       NB_oledDraw();
       delay(g_device_delay*1000);  
     }
