@@ -1,9 +1,7 @@
 //==================================================
 // SW-99-testapp.ino
-// 2016-04-11
+// 2016-04-13
 //==================================================
-int g_sw_id = 99;
-
 #define CONF_LED_TWO        2
 #define CONF_LED_THREE      3
 #define CONF_LED_FOUR       4
@@ -17,36 +15,33 @@ int g_sw_id = 99;
 #define CONF_COMM_WIFI      2
 #define CONF_COMM_SERIAL    3
 
-#define INFO_START_READ_SENSOR_DATA 1
-#define INFO_END_READ_SENSOR_DATA   2
-#define INFO_START_SEND_SENSOR_DATA 3
-#define INFO_END_SEND_SENSOR_DATA 4
-#define INFO_REC_SERVER_DATA  5
+
 //==================================================
-// Configuration
+// Customer Configuration
 //==================================================
 int g_debug              = 1;
 const char* g_clientName = "SW-99";
 const char* g_confServer = "sercon.simuino.com";
-int g_delay       = 2;
-int g_connection_status = 0;
+int g_delay              = 2;
 //==================================================
-
-#define NFLOAT 2  // No of decimals i float value
-
+// Development Configuration
 //==================================================
+int g_sw_id = 99;
+#define NFLOAT 2    // No of decimals i float value
 #define MAX_SID 10 
 int g_sid[MAX_SID] = {2,901,902,903,904,905,906,907,908};
-int conf_display         = CONF_DISPLAY_OLED;
-int conf_comm            = CONF_COMM_SERIAL;
-int conf_sensor          = CONF_SENSOR_OW;
-int conf_led             = CONF_LED_THREE;
-float g_sensor_data[MAX_SID];
-int g_nsensor = 0;
-char g_server[40];
+
+int g_conf_display         = CONF_DISPLAY_OLED;
+int g_conf_comm            = CONF_COMM_SERIAL;
+int g_conf_sensor          = CONF_SENSOR_OW;
+int g_conf_led             = CONF_LED_THREE;
+
+int   g_nsensor = 0;
+char  g_server[40];
 float g_data[MAX_SID];
-char g_ip_address[40];
-char g_msg[80];
+char  g_ip_address[40];
+char  g_msg[80];
+int   g_connection_status;
 
 #define NABTON_DATA     1 
  
@@ -82,6 +77,17 @@ char g_msg[80];
 // D20 SDA I2C OLED
 // D21 SCL I2C OLED
 //=================================================
+#define M_PI 1
+#define M_VALUE 2
+#define M_SERVER 3
+#define M_CONNECTION_STATUS 4
+#define M_NSENSOR 5
+
+#define INFO_START_READ_SENSOR_DATA 1
+#define INFO_END_READ_SENSOR_DATA   2
+#define INFO_START_SEND_SENSOR_DATA 3
+#define INFO_END_SEND_SENSOR_DATA 4
+#define INFO_REC_SERVER_DATA  5
 //+++++++++++++++++++++++++++++++++++++++++++++++++
 // API configration
 //+++++++++++++++++++++++++++++++++++++++++++++++++
@@ -156,10 +162,31 @@ void api_LED_init()
      LL_led(whiteLed,LOW);
 }
 
-void api_LED_inform(int info)
+void api_LED_info(int info_id, int x)
 {
+  if(info_id == M_CONNECTION_STATUS)
+  {
+   if(x == 0)digitalWrite(redLed,  HIGH);
+   if(x == 1)digitalWrite(redLed,  LOW);  
+  }
+}
 
+void api_LED_event_send()
+{
+  
+}
 
+void api_LED_event_msg()
+{
+  
+}
+void api_LED_on(int led)
+{
+   digitalWrite(led,  HIGH);
+}
+void api_LED_off(int led)
+{
+   digitalWrite(led,  LOW);
 }
 
 //=================================================
@@ -189,7 +216,7 @@ int api_OWT_init()
   return(nsensors);
 }
 
-void api_OWT_requestTemperature()
+void api_OWT_updateTemperature()
 {
     sensors.requestTemperatures();
 }
@@ -298,16 +325,36 @@ void api_OLED_write_float(int row, int col,float x)
 // ADD-ON: COMMUNICATION HTTP over SERIAL (CHS)
 //==================================================
 
-int api_CHS_send(int app_id, int mid, int sid, float data, int other)
+int api_CHS_connect(int sw_id)
+{
+  char msg[20];
+  char nbbuff[50];
+  int nx,answer=0,connection=0;
+  
+  sprintf(msg,"connect %d",sw_id);
+  Serial.println(msg);
+  delay(200);
+  nx = Serial.available();
+  if (nx > 0) 
+  {
+     Serial.readBytes(nbbuff,nx);
+     sscanf(nbbuff,"%d",&answer);
+  }
+  if(answer == sw_id)connection = 1;
+
+  return(connection);
+}
+
+int api_CHS_send(int sw_id, int mid, int sid, float data, int other)
 {
      int ixSid = 0,i,negative=0;
      char msg1[100],msg2[50],checksum[20];
      strcpy(msg1," ");
      strcpy(msg2," ");
-     digitalWrite(yellowLed,HIGH);
+
      // Mandatory part of message
-     sprintf(msg1,"?sw=%d&mid=%d&nsid=%d&sid1=%d",app_id,mid,1,sid);
-if(g_debug==1){Serial.print("data:");Serial.println(data);}      
+     sprintf(msg1,"?sw=%d&mid=%d&nsid=%d&sid1=%d",sw_id,mid,1,sid);
+     if(g_debug==1){Serial.print("data:");Serial.println(data);}      
      if(mid == NABTON_DATA)
      {
        negative = 0;
@@ -318,13 +365,13 @@ if(g_debug==1){Serial.print("data:");Serial.println(data);}
        }
        // Get non-decimal part
        int part1 = floor(data);
-if(g_debug==1){Serial.print("part1:");Serial.println(part1);}       
+       if(g_debug==1){Serial.print("part1:");Serial.println(part1);}       
        // Get decimalpart
        float ftemp = (data - part1);
        for(i=1;i<=NFLOAT;i++)ftemp=ftemp*10;
-if(g_debug==1){Serial.print("ftemp:");Serial.println(ftemp);}   
+       if(g_debug==1){Serial.print("ftemp:");Serial.println(ftemp);}   
        int part2 = round(ftemp);
-if(g_debug==1){Serial.print("part2:");Serial.println(part2);}          
+       if(g_debug==1){Serial.print("part2:");Serial.println(part2);}          
        // if negative
        if(negative == 0)
        {
@@ -349,7 +396,6 @@ if(g_debug==1){Serial.print("part2:");Serial.println(part2);}
      
      // Send meassage
      Serial.println(msg1);
-     digitalWrite(yellowLed,LOW);
     return(other);
 }
 
@@ -395,57 +441,36 @@ void api_CHS_receive()
 // ADD-ON: COMMUNICATION HTTP over Bluetooth (CHB)
 //==================================================
 
-/**************************************************
-Every system is based on:
-
-communication between Arduino and:
-  Serial -> RaspberryPi -> Wifi/Eth HTTP Server
-  Ethernet HTTP Server
-  Wifi HTTP Server
-  
-  
-sensor data (float values and means of collection)
-  One Wire (temperature, ...)
-
-display:
-  LCD
-  OLED
-led:
-  2 leds
-  3 leds
-  4 leds
-**************************************************/
 //+++++++++++++++++++++++++++++++++++++++++++++++++
 // SUB Libraries
 //+++++++++++++++++++++++++++++++++++++++++++++++++
-#define M_PI 1
-#define M_VALUE 2
-#define M_IP_ADDRESS 3
-#define M_CONNECTION_STATUS 4
-#define M_NSENSOR 5
 
-void SUB_requestData()
+
+void SUB_updateData()
 {
-   api_OWT_requestTemperature();  
+   api_OWT_updateTemperature();  
 }
 void SUB_info(int id, int i, float f, char s[])
 {
+ 
+    api_LED_info(id,g_connection_status);
+  
     api_OLED_write_int(1,2,g_delay);
     api_OLED_write_int(1,3,g_nsensor);
     api_OLED_write_string(3,1,g_server);
     api_OLED_Display();
 }
-void SUB_send(int sw_id,int msg_id,int sid,float value,int misc)
+void SUB_sendData(int sw_id,int msg_id,int sid,float value,int misc)
 {
 
-    if(conf_comm == CONF_COMM_SERIAL)
+    if(g_conf_comm == CONF_COMM_SERIAL)
     {
       api_CHS_send(sw_id,msg_id,1,value,misc);
     }
   
 }
 
-void SUB_receive()
+void SUB_receiveMsg()
 {
  strcpy(g_msg,"test");
 }
@@ -467,12 +492,16 @@ void SUB_info_default()
 
 int  SUB_connect()
 {
-  
+   int con = 0;
+   con = api_CHS_connect(g_sw_id);
+   return(1); //Benny
 }
 
 float  SUB_getData(int i)
 {
-  return(1.0);  
+  float value;
+  api_OWT_getTemperature(i);
+  return(value);  
 }
 //+++++++++++++++++++++++++++++++++++++++++++++++++
 // SETUP Libraries
@@ -484,6 +513,7 @@ void SETUP_collect()
 void SETUP_info()
 {
    SUB_info_default();
+   SUB_info(M_CONNECTION_STATUS,g_connection_status,0.0,"connected");
 }
 void SETUP_sendrec()
 {
@@ -502,7 +532,7 @@ void LOOP_collect()
   if(g_debug == 1)Serial.println("LOOP_collect");
   int i;
 
-  SUB_requestData();
+  SUB_updateData();
   for(i=0;i<g_nsensor;i++)
   {
        g_data[i] = SUB_getData(i);
@@ -513,8 +543,7 @@ void LOOP_info()
 {
   if(g_debug == 1)Serial.println("LOOP_info");
   int i;
-  SUB_info(M_CONNECTION_STATUS,g_connection_status,0.0,"-");
-  SUB_info(M_IP_ADDRESS,0,0.0,g_ip_address);
+  SUB_info(M_SERVER,0,0.0,g_server);
   SUB_info(M_NSENSOR,g_nsensor,0.0,"-");
   for(i=0;i<g_nsensor;i++)
   {
@@ -530,14 +559,24 @@ void LOOP_info()
 }
 void LOOP_sendrec()
 {
-    if(g_debug == 1)Serial.println("LOOP_sendrec");
-    int i;
+  int i;
+  if(g_debug == 1)Serial.println("LOOP_sendrec");
+  if(g_connection_status == 1)
+  {
+    if(g_debug == 1)Serial.println(g_nsensor);
     for(i=0;i<g_nsensor;i++)
     {
-      SUB_send(g_sw_id,NABTON_DATA,g_sid[i],g_data[i],0);
+      if(g_debug == 1)Serial.println(i);
+      SUB_sendData(g_sw_id,NABTON_DATA,g_sid[i],g_data[i],0);
       delay(1500); // Wait for response from server  
-      SUB_receive();
+      SUB_receiveMsg();
     }
+  }
+  else
+  {
+   if(g_debug == 1)Serial.println("No connection");
+  }
+  
 }
 void LOOP_delay()
 {
