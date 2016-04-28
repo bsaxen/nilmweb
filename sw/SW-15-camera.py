@@ -10,13 +10,13 @@ import os
 # Read configuration
 #==================================================
 print 'Version 2016-04-28'
-g_debug     = 'YES';
-g_server    = '78.67.160.17'
-g_sercon    = 'config.nabton.com'
+g_debug     = 'NO';
+g_server    = 'xx.xx.xx.xx'
+g_sercon    = 'config.nilm.se'
 g_path      = '/sxndata/index.php'
-g_ipaddress = 'x.x.x.x'
+g_ipaddress = 'xx.xx.xx.xx'
 g_delay     = 10
-g_name      = 'uniqueName'
+g_name      = 'SW-15-camera'
 #==================================================
 os.system("ifconfig > ipaddress.work")
 file = open('ipaddress.work','r')
@@ -27,7 +27,7 @@ for line in file:
         g_ipaddress = work[1] 
         print 'local ipaddress ' + g_ipaddress
 
-req = g_path+ '?mid=5'+'&appid=98'+'&ip=' + g_ipaddress + '&name=' + g_name  
+req = g_path+ '?mid=5'+'&appid=15'+'&ip=' + g_ipaddress + '&name=' + g_name  
      
 while 1:
 	conn = httplib.HTTPConnection(g_server)
@@ -38,6 +38,8 @@ while 1:
 			if g_debug == 'YES':
                 		print ("Server Response:-_- %s %s " % (r1.status, r1.reason))
             		data1 = r1.read()
+            		# Check if FF_PICTURE
+			os.system("raspistill -o myimage.jpg -t 3000pi");
             		if g_debug == 'YES':
                 		print data1
         	except:
