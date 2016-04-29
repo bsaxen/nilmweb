@@ -52,7 +52,7 @@ while 1:
             		# Check if FF_PHOTO
                     	if "FF_PHOTO" in data1:
                     		os.system(take_photo);
-				            os.system(scp_photo);
+				os.system(scp_photo);
             		if g_debug == 'YES':
                 		print data1
         	except:
