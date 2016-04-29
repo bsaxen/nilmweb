@@ -14,6 +14,8 @@ if(isset($_GET['page']))
 {
     $page  = $_GET['page'];
 }
+if(!$page)$page = "home";
+    
 $_SESSION['page'] = $page;
                
 echo("<ul class=\"navbar\">");
