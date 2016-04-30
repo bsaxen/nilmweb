@@ -35,7 +35,7 @@ for line in file:
         work=words[11].split(':')
         g_ipaddress = work[1] 
         print 'local ipaddress ' + g_ipaddress
-now = time.strftime("%d-%m-%Y-%H-%M-%S")
+now = time.strftime("%Y-%m-%d-%H-%M-%S")
 photo_name    = "SW-15-sid%d-%s.jpg" % (g_sid,now)
 take_photo    = "raspistill -o %s -t 1000pi" % (photo_name)
 scp_photo     = "scp %s %s" % (photo_name,g_scp)
