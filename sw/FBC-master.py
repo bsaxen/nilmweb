@@ -34,12 +34,21 @@ for line in file:
         work=words[11].split(':')
         g_ipaddress = work[1] 
         print 'local ipaddress ' + local_ipaddress
-
+file.close()
 r_scp = '%s@%s:/home/%s/%s' % (g_user,g_server,g_user,g_path)
 if g_debug:
   print r_scp
 while 1:
     # read local mailbox
+    os.system("ls > FBC.work")
+    file = open('FBC.work','r')
+    for line in file:
+        if 'Bcast' in line:
+            words=line.split(' ')
+            work=words[11].split(':')
+            g_ipaddress = work[1] 
+            print 'local ipaddress ' + local_ipaddress
+    file.close()
     # FBC-<id>.register - register and create slave directory FBC/<id>/msg
     # FBC-<id>.clear - clear mailbox 
     time.sleep(g_delay)
