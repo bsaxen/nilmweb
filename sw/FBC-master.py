@@ -39,6 +39,9 @@ r_scp = '%s@%s:/home/%s/%s' % (g_user,g_server,g_user,g_path)
 if g_debug:
   print r_scp
 while 1:
+    # read local mailbox
+    # FBC-<id>.register - register and create slave directory FBC/<id>/msg
+    # FBC-<id>.clear - clear mailbox 
     time.sleep(g_delay)
 # End of file
 
