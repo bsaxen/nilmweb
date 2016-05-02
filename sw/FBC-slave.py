@@ -16,14 +16,11 @@ import os
 #==================================================
 # Read configuration
 #==================================================
-g_sid       = 901
-g_user      = 'folke'
+g_sender    = 803
 g_debug     = 'YES';
-g_server    = 'nilm.se'
-g_path      = '/FBC'
-g_delay     = 10
+g_delay     = 2
 g_name      = 'FBC-slave'
-g_scp       = 'folke@nilm.se:/home/folke/FBC/'
+g_scp       = 'folke@nilm.se:/home/folke/FBC'
 #==================================================
 local_ipaddress = 'x.x.x.x'
 os.system("ifconfig > ipaddress.work")
@@ -32,35 +29,47 @@ for line in file:
     if 'Bcast' in line:
         words=line.split(' ')
         work=words[11].split(':')
-        g_ipaddress = work[1] 
+        local_ipaddress = work[1] 
         print 'local ipaddress ' + local_ipaddress
 file.close()
-r_scp = '%s@%s:/home/%s/%s' % (g_user,g_server,g_user,g_path)
-if g_debug:
-  print r_scp
+
+cmd = 'touch xFBC-%s.register' % (g_sender)
+os.system(cmd)
+cmd = 'touch xFBC-%s.delete' % (g_sender)
+os.system(cmd)
+cmd = 'touch xFBC-%s.clear' % (g_sender)
+os.system(cmd)
+
+# Delete files from Master
+cmd = 'SSH_AUTH_SOCK=0 scp xFBC-%s.register %s/.' % (g_sender, g_scp)
+print cmd
+os.system(cmd)
+time.sleep(5)
+
 while 1:
-    # read local mailbox
-    os.system("ls FBC-* > FBC.work")
+    # Get files from Master
+    cmd = 'SSH_AUTH_SOCK=0 scp -r %s/%s .' % (g_scp,g_sender)
+    print cmd
+    os.system(cmd)
+    # Delete files from Master
+    cmd = 'SSH_AUTH_SOCK=0 scp xFBC-%s.clear %s/.' % (g_sender,g_scp,)
+    print cmd
+    os.system(cmd)
+    
+    cmd = 'ls -R 2>/dev/null %s/* > FBC.work' % (g_sender)
+    os.system(cmd)
     file = open('FBC.work','r')
     for line in file:
-        if 'FBC' in line:
-            words=line.split('-')
-            work=words[2].split('.')
-            sender = work[1]
-            action = work[2]
-            print 'Sender= ' + sender + 'Action=' + action
-            if action == 'clear':
-                cmd = 'rm %s/%d/msg/*.msg' % (g_path,sender)
-                os.system(cmd)
-            if action == 'register'
-                cmd = 'mkdir %s/%d/msg' % (g_path,sender)
-                os.system(cmd)
+        work=line.split('.')
+        sender = work[0]
+        action = work[1]
+        print 'Sender= ' + sender + 'Action=' + action
+        if 'benny' in action:
+            print 'benny'
+        if 'adam' in action:
+            print 'adam'
     file.close()
-    cmd = 'rm FBC-*'
+    cmd = 'rm -r -R 2>/dev/null %s/*' % (g_sender)
     os.system(cmd)
-    # FBC-<id>.register - register and create slave directory FBC/<id>/msg
-    # FBC-<id>.clear - clear mailbox 
     time.sleep(g_delay)
 # End of file
-
-
