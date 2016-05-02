@@ -49,6 +49,12 @@ while 1:
             sender = work[1]
             action = work[2]
             print 'Sender= ' + sender + 'Action=' + action
+            if action == 'clear':
+                cmd = 'rm %s/%d/msg/*.msg' % (g_path,sender)
+                os.system(cmd)
+            if action == 'register'
+                cmd = 'mkdir %s/%d/msg' % (g_path,sender)
+                os.system(cmd)
     file.close()
     # FBC-<id>.register - register and create slave directory FBC/<id>/msg
     # FBC-<id>.clear - clear mailbox 
