@@ -43,11 +43,12 @@ while 1:
     os.system("ls > FBC.work")
     file = open('FBC.work','r')
     for line in file:
-        if 'Bcast' in line:
-            words=line.split(' ')
-            work=words[11].split(':')
-            g_ipaddress = work[1] 
-            print 'local ipaddress ' + local_ipaddress
+        if 'FBC' in line:
+            words=line.split('-')
+            work=words[2].split('.')
+            sender = work[1]
+            action = work[2]
+            print 'Sender= ' + sender + 'Action=' + action
     file.close()
     # FBC-<id>.register - register and create slave directory FBC/<id>/msg
     # FBC-<id>.clear - clear mailbox 
