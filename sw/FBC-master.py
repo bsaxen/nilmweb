@@ -40,7 +40,7 @@ if g_debug:
   print r_scp
 while 1:
     # read local mailbox
-    os.system("ls > FBC.work")
+    os.system("ls FBC-* > FBC.work")
     file = open('FBC.work','r')
     for line in file:
         if 'FBC' in line:
@@ -56,6 +56,8 @@ while 1:
                 cmd = 'mkdir %s/%d/msg' % (g_path,sender)
                 os.system(cmd)
     file.close()
+    cmd = 'rm FBC-*'
+    os.system(cmd)
     # FBC-<id>.register - register and create slave directory FBC/<id>/msg
     # FBC-<id>.clear - clear mailbox 
     time.sleep(g_delay)
