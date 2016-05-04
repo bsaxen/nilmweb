@@ -96,4 +96,6 @@ while 1:
     		print '-_- Not able to connect to server '+g_server
   	conn.close()
   	time.sleep(g_delay)
+  	GPIO.output(led_yellow,False)
+  	time.sleep(1)
 # End of file
