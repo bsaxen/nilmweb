@@ -61,6 +61,7 @@ while 1:
 		conn.request("GET", req)
 		try:
 			r1 = conn.getresponse()
+			GPIO.output(led_yellow,False)
 			if g_debug == 'YES':
         			print ("Server Response:-_- %s %s " % (r1.status, r1.reason))
       			data1 = r1.read()
@@ -74,17 +75,23 @@ while 1:
         				if '1' in words[num]:
         					print 'blink GREEN led'
         					GPIO.output(led_green,True)
-        					time.sleep(1)
-        					GPIO.output(led_green,False)
+        				
+        					
         				if '2' in words[num]:
         					print 'blink RED led'
         					GPIO.output(led_red,True)
-        					time.sleep(1)
-        					GPIO.output(led_red,False)
+        				
+        				if '3' in words[num]:
+        					print 'blink YELLOW led'
+        					GPIO.output(led_yellow,True)
+        					
         				time.sleep(1)
+        				GPIO.output(led_green,False)
+        				GPIO.output(led_red,False)
+        				GPIO.output(led_yellow,False)
     		except:
       			print '-_- No response from server'
-      		GPIO.output(led_yellow,False)
+      		
   	except:
     		print '-_- Not able to connect to server '+g_server
   	conn.close()
