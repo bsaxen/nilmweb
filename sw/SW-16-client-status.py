@@ -2,6 +2,7 @@
 #==================================================
 # SW-16-client-status.py
 # 2016-05-03
+# sudo apt-get install python-rpi.gpio python3-rpi.gpio
 #==================================================
 import time
 import httplib
