@@ -129,6 +129,10 @@ echo("
   <input type=\"button\" value=\"Beacon\" />
 </a></td><td>-</td></tr>
 
+<tr><td>.py</td><td>Raspberry Pi 2,3</td><td><a href=\"sw/SW-16-client-status.py\" download=\"SW-16-client-status.py\">
+  <input type=\"button\" value=\"Client Status\" />
+</a></td><td>-</td></tr>
+
 </table>
 ");
 //----------------------------------------
@@ -173,11 +177,10 @@ if($page == "contact")
 echo("
 <br>E-mail: contact@nilm.se<br>
     
-<address>NILM.SE 2016</address>
 ");
 }
 
-echo("<address>NILM.SE 2016</address>");
+echo("<address>NILM.SE 2016  Updated 2016-05-04</address>");
 ?>
     
 </body>
