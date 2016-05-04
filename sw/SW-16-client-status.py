@@ -5,8 +5,29 @@
 # sudo apt-get install python-rpi.gpio python3-rpi.gpio
 #==================================================
 import time
+import datetime
+import RPi.GPIO as GPIO
 import httplib
 import os
+
+GPIO.setmode(GPIO.BOARD)
+GPIO.setup(12, GPIO.OUT) # Green Led
+GPIO.setup(16, GPIO.OUT) # Yellow Led
+GPIO.setup(18, GPIO.OUT) # Red led
+#-------------------
+#	3.3		5.0	--------> to 5.0 v
+#	-		-	
+#	-		GND	--------> to ground
+#	7		8
+#	-		10
+#	17		12	--------> to LED (GREEN)
+#	-		-
+#	-		16	--------> to LED (YELLOW)
+#	-		18	--------> to LED (RED)
+#-------------------
+led_green  = 12
+led_red    = 18
+led_yellow = 16
 #==================================================
 # Read configuration
 #==================================================
@@ -29,8 +50,12 @@ for line in file:
         g_ipaddress = work[1] 
         print 'local ipaddress ' + g_ipaddress
 
-req = g_path+ "?appid=%d&mid=%d&name=%s&ip=%s&nsid=1&sid1=%d" % (g_swid,g_mid,g_name,g_ipaddress,g_sid)     
+req = g_path+ "?appid=%d&mid=%d&name=%s&ip=%s&nsid=1&sid1=%d" % (g_swid,g_mid,g_name,g_ipaddress,g_sid) 
+GPIO.output(led_green,False)
+GPIO.output(led_red,False)
+GPIO.output(led_yellow,False)
 while 1:
+	GPIO.output(led_yellow,True)
 	conn = httplib.HTTPConnection(g_server)
 	try:
 		conn.request("GET", req)
@@ -48,10 +73,18 @@ while 1:
         			for num in range(1,ndata):
         				if '1' in words[num]:
         					print 'blink GREEN led'
+        					GPIO.output(led_green,True)
+        					time.sleep(1)
+        					GPIO.output(led_green,False)
         				if '2' in words[num]:
         					print 'blink RED led'
+        					GPIO.output(led_red,True)
+        					time.sleep(1)
+        					GPIO.output(led_red,False)
+        				time.sleep(1)
     		except:
       			print '-_- No response from server'
+      		GPIO.output(led_yellow,False)
   	except:
     		print '-_- Not able to connect to server '+g_server
   	conn.close()
