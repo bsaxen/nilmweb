@@ -85,7 +85,7 @@ while 1:
         					print 'blink YELLOW led'
         					GPIO.output(led_yellow,True)
         					
-        				time.sleep(1)
+        				time.sleep(0.5)
         				GPIO.output(led_green,False)
         				GPIO.output(led_red,False)
         				GPIO.output(led_yellow,False)
@@ -97,5 +97,5 @@ while 1:
   	conn.close()
   	time.sleep(g_delay)
   	GPIO.output(led_yellow,False)
-  	time.sleep(1)
+  	time.sleep(0.5)
 # End of file
