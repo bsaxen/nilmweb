@@ -62,6 +62,7 @@ while 1:
 		try:
 			r1 = conn.getresponse()
 			GPIO.output(led_yellow,False)
+			time.sleep(0.5)
 			if g_debug == 'YES':
         			print ("Server Response:-_- %s %s " % (r1.status, r1.reason))
       			data1 = r1.read()
@@ -75,8 +76,7 @@ while 1:
         				if '1' in words[num]:
         					print 'blink GREEN led'
         					GPIO.output(led_green,True)
-        				
-        					
+	
         				if '2' in words[num]:
         					print 'blink RED led'
         					GPIO.output(led_red,True)
