@@ -1,11 +1,16 @@
-#
-import os 
+#!/usr/bin/python
+#==================================================
+# SW-17-temperature.py
+# 2016-05-04 
+#==================================================
+import time
+import datetime
+import httplib
+import os
 import glob 
-import time 
 
 os.system('modprobe w1-gpio') 
 os.system('modprobe w1-therm') 
-
 
 base_dir = '/sys/bus/w1/devices/' 
 device_folder = glob.glob(base_dir + '28*')[0] 
