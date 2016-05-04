@@ -38,10 +38,17 @@ while 1:
 			if g_debug == 'YES':
         			print ("Server Response:-_- %s %s " % (r1.status, r1.reason))
       			data1 = r1.read()
-      			if "STATUS" in data1:
+      			words = data1.split()
+      			ndata = len(words)
+      			ndata--
+      			if "CLIENT" in words[0] and "STATUS" in words[ndata]:
         			if g_debug == 'YES':
          				print data1
-        			print 'blink leds....'
+        			for num in range(1,ndata):
+        				if '1' in words[num]:
+        					print 'blink GREEN led'
+        				if '2' in words[num]:
+        					print 'blink RED led'
     		except:
       			print '-_- No response from server'
   	except:
