@@ -68,7 +68,7 @@ while 1:
       			data1 = r1.read()
       			words = data1.split()
       			ndata = len(words)
-      			ndata--
+      			ndata = ndata - 1
       			if "CLIENT" in words[0] and "STATUS" in words[ndata]:
         			if g_debug == 'YES':
          				print data1
@@ -89,6 +89,7 @@ while 1:
         				GPIO.output(led_green,False)
         				GPIO.output(led_red,False)
         				GPIO.output(led_yellow,False)
+        				time.sleep(0.5)
     		except:
       			print '-_- No response from server'
       		
