@@ -26,17 +26,18 @@ g_ipaddress = 'xx.xx.xx.xx'
 g_delay     = 10
 g_name      = 'SW-15-camera'
 g_scp       = 'folke@nilm.se:/var/www/html/sxn_photo/.'
-#def RCFS(par):
+#def RCFS(sid,par):
 #	print par
+#	print sid
 #	return;
 #==================================================
 # RCFS - Read configuration from server
 #==================================================
-# g_server = RCFS("SERVER")
-# g_path   = RCFS("PATH")
-# g_delay  = RCFS("DELAY")
-# g_name   = RCFS("NAME")
-# g_scp    = RFCS("DIR_PHOTO")
+# g_server = RCFS(g_sid,"SERVER")
+# g_path   = RCFS(g_sid,"PATH")
+# g_delay  = RCFS(g_sid,"DELAY")
+# g_name   = RCFS(g_sid,"NAME")
+# g_scp    = RFCS(g_sid,"DIR_PHOTO")
 #==================================================
 os.system("ifconfig > ipaddress.work")
 file = open('ipaddress.work','r')
