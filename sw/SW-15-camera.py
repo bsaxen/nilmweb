@@ -18,7 +18,7 @@ import os
 g_sid       = 901
 g_mid       = 3
 g_swid      = 15
-g_sercon    = 'config.nilm.se'
+g_sercon    = '78.67.160.17'
 g_debug     = 'YES';
 #==================================================
 # Soft configuration
