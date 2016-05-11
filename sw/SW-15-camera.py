@@ -48,20 +48,22 @@ while (count < 5):
 			r1 = conn.getresponse()
 			if g_debug == 'YES':
                 		print ("Server Response:-_- %s %s " % (r1.status, r1.reason))
-            		data1 = r1.read()
-            		word = data1.split()
-                    	if "RCFS_SERVER" in word[0]:
-                    		global g_server = word[1]
-                    	if "RCFS_PATH" in word[0]:
-                    		global g_path = words[1]
-                    	if "RCFS_DELAY" in word[0]:
-                    		global g_delay = words[1]		
-			if "RCFS_NAME" in word[0]:
-                    		global g_name = words[1]	
-			if "RCFS_DIR_PHOTO" in word[0]:
-                    		global g_dir_photo = words[1]	
-            		if g_debug == 'YES':
-                		print data1
+                	if r1.status == 200:
+                		count = 9
+            			data1 = r1.read()
+            			word = data1.split()
+                    		if "RCFS_SERVER" in word[0]:
+                    			global g_server = word[1]
+                    		if "RCFS_PATH" in word[0]:
+                    			global g_path = words[1]
+                    		if "RCFS_DELAY" in word[0]:
+                    			global g_delay = words[1]		
+				if "RCFS_NAME" in word[0]:
+                    			global g_name = words[1]	
+				if "RCFS_DIR_PHOTO" in word[0]:
+                    			global g_dir_photo = words[1]	
+            			if g_debug == 'YES':
+                			print data1
         	except:
             		print '-_- No response from config server'
     	except:
