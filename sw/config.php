@@ -29,14 +29,15 @@ function getConfigValue($sid,$par)
         $handle = fopen($filename, "w");
         if ($handle) 
         {
-            fwrite($handle, "RCFS_SERVER 78.67.160.17");
-            fwrite($handle, "RCFS_PATH /sxndata/index.php");
-            fwrite($handle, "RCFS_DELAY 10");
-            fwrite($handle, "RCFS_NAME NoName_$sid");
-            fwrite($handle, "RCFS_DIR_PHOTO folke@nilm.se:/var/www/html/sxn_photo");
+            fwrite($handle, "RCFS_SERVER 78.67.160.17 \n");
+            fwrite($handle, "RCFS_PATH /sxndata/index.php \n");
+            fwrite($handle, "RCFS_DELAY 10 \n");
+            fwrite($handle, "RCFS_NAME NoName_$sid \n");
+            fwrite($handle, "RCFS_DIR_PHOTO folke@nilm.se:/var/www/html/sxn_photo \n");
+            fclose($handle);
         }
     }
-    }
+    
 }
 
 //==============================================================================
