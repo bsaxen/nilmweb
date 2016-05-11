@@ -15,7 +15,7 @@ function getConfigValue($sid,$par)
             {
                 $line = trim($line);
                 $pos = strpos($line, $par);
-                if($pos !== null)
+                if($pos !== false)
                 {
                     sscanf($line,"%s %s",$key,$value);
                 }
