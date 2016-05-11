@@ -36,7 +36,7 @@ g_ipaddress = 'xx.xx.xx.xx'
 #---------------------------------------------------
 def RCFS(sid,par):
 #---------------------------------------------------
-req = "index.php?config=%s&sid=%d" % (par,sid)     
+req = "config.php?config=%s&sid=%d" % (par,sid)     
 count = 0;
 
 while (count < 5):
