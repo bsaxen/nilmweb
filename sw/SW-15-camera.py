@@ -29,8 +29,10 @@ g_scp       = 'folke@nilm.se:/var/www/html/sxn_photo/.'
 #---------------------------------------------------
 def RCFS(sid,par):
 #---------------------------------------------------
-req = "?config=%s&sid=%d" % (par,sid)     
-while config == FALSE:
+req = "index.php?config=%s&sid=%d" % (par,sid)     
+count = 0;
+while (count < 5):
+	count = count + 1
 	conn = httplib.HTTPConnection(g_sercon)
 	try:
 		conn.request("GET", req)
@@ -39,14 +41,17 @@ while config == FALSE:
 			if g_debug == 'YES':
                 		print ("Server Response:-_- %s %s " % (r1.status, r1.reason))
             		data1 = r1.read()
-            		# Check if FF_PHOTO
-                    	if "RCFS_SERVER" in data1:
-                    		
-				
-				
-				
-                    		
-				
+            		word = data1.split()
+                    	if "RCFS_SERVER" in word[0]:
+                    		g_server = word[1]
+                    	if "RCFS_PATH" in word[0]:
+                    		g_path = words[1]
+                    	if "RCFS_DELAY" in word[0]:
+                    		g_delay = words[1]		
+			if "RCFS_NAME" in word[0]:
+                    		g_name = words[1]	
+			if "RCFS_DIR_PHOTO" in word[0]:
+                    		g_dir_photo = words[1]	
             		if g_debug == 'YES':
                 		print data1
         	except:
@@ -60,11 +65,11 @@ while config == FALSE:
 #==================================================
 # RCFS - Read configuration from server
 #==================================================
-# g_server = RCFS(g_sid,"SERVER")
-# g_path   = RCFS(g_sid,"PATH")
-# g_delay  = RCFS(g_sid,"DELAY")
-# g_name   = RCFS(g_sid,"NAME")
-# g_scp    = RFCS(g_sid,"DIR_PHOTO")
+g_server = RCFS(g_sid,"SERVER")
+g_path   = RCFS(g_sid,"PATH")
+g_delay  = RCFS(g_sid,"DELAY")
+g_name   = RCFS(g_sid,"NAME")
+g_scp    = RFCS(g_sid,"DIR_PHOTO")
 #==================================================
 os.system("ifconfig > ipaddress.work")
 file = open('ipaddress.work','r')
