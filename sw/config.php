@@ -3,16 +3,23 @@
 function getConfigValue($sid,$par)
 //======================================= 
 {
-  $filename = $sid.'.conf';
+    $value = 'void';
+    $filename = $sid.'.conf';
     $handle = fopen($filename, "r");
     if ($handle) 
     {    
         while (($line = fgets($handle)) !== false) 
         {
           $line = trim($line);
-          
+          $pos = strpos($line, $par);
+          if($pos !== null)
+          {
+            sscanf($line,"%s %s",$key,$value);
+          }
         }
         fclose($handle);
+    }
+    return($value);
     } 
 }
 
