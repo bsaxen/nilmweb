@@ -83,12 +83,13 @@ def getLocalIpAddress():
         		work=words[11].split(':')
         		global g_ipaddress = work[1] 
         		print 'local ipaddress ' + g_ipaddress
+     
 	return
 
 getConfiguration(g_sid)
 getLocalIpAddress()
+g_req = g_path+ "?appid=%d&mid=%d&name=%s&ip=%s&nsid=1&sid1=%d" % (g_swid,g_mid,g_name,g_ipaddress,g_sid)  
 
-req = g_path+ "?appid=%d&mid=%d&name=%s&ip=%s&nsid=1&sid1=%d" % (g_swid,g_mid,g_name,g_ipaddress,g_sid)     
 while 1:
 	conn = httplib.HTTPConnection(g_server)
 	try:
@@ -108,8 +109,10 @@ while 1:
 				os.system(scp_photo);
 			if "FF_RECONFIG" in data1:
 				getConfiguration(g_sid)
+				g_req = g_path+ "?appid=%d&mid=%d&name=%s&ip=%s&nsid=1&sid1=%d" % (g_swid,g_mid,g_name,g_ipaddress,g_sid)
 			if "FF_LOCAL_IP_UPDATE" in data1:
 				getLocalIpAddress()
+				g_req = g_path+ "?appid=%d&mid=%d&name=%s&ip=%s&nsid=1&sid1=%d" % (g_swid,g_mid,g_name,g_ipaddress,g_sid)
             		if g_debug == 'YES':
                 		print data1
         	except:
