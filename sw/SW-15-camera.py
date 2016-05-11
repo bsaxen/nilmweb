@@ -13,19 +13,26 @@ import time
 import httplib
 import os
 #==================================================
-# Read configuration
+# Hard configuration
 #==================================================
 g_sid       = 901
 g_mid       = 3
 g_swid      = 15
-g_debug     = 'YES';
-g_server    = 'x.x.x.x'
 g_sercon    = 'config.nilm.se'
+g_debug     = 'YES';
+#==================================================
+# Soft configuration
+#==================================================
+g_server    = 'x.x.x.x'
 g_path      = '/sxndata/index.php'
-g_ipaddress = 'xx.xx.xx.xx'
 g_delay     = 10
 g_name      = 'SW-15-camera'
-g_scp       = 'folke@nilm.se:/var/www/html/sxn_photo/.'
+g_dir_photo = 'folke@nilm.se:/var/www/html/sxn_photo/.'
+#==================================================
+# Info configuration
+#==================================================
+g_ipaddress = 'xx.xx.xx.xx'
+
 #---------------------------------------------------
 def RCFS(sid,par):
 #---------------------------------------------------
