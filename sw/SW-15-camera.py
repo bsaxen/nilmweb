@@ -66,11 +66,11 @@ while (count < 5):
 #---------------------------------------------------
 def getConfiguration(sid):
 #---------------------------------------------------
-	g_server = RCFS(sid,"SERVER")
-	g_path   = RCFS(sid,"PATH")
-	g_delay  = RCFS(sid,"DELAY")
-	g_name   = RCFS(sid,"NAME")
-	g_scp    = RFCS(sid,"DIR_PHOTO")
+	global g_server = RCFS(sid,"SERVER")
+	global g_path   = RCFS(sid,"PATH")
+	global g_delay  = RCFS(sid,"DELAY")
+	global g_name   = RCFS(sid,"NAME")
+	global g_scp    = RFCS(sid,"DIR_PHOTO")
 	return
 #---------------------------------------------------
 def getLocalIpAddress():
@@ -81,7 +81,7 @@ def getLocalIpAddress():
     		if 'Bcast' in line:
         		words=line.split(' ')
         		work=words[11].split(':')
-        		g_ipaddress = work[1] 
+        		global g_ipaddress = work[1] 
         		print 'local ipaddress ' + g_ipaddress
 	return
 
