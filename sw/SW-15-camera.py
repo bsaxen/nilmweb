@@ -31,6 +31,7 @@ def RCFS(sid,par):
 #---------------------------------------------------
 req = "index.php?config=%s&sid=%d" % (par,sid)     
 count = 0;
+
 while (count < 5):
 	count = count + 1
 	conn = httplib.HTTPConnection(g_sercon)
@@ -43,15 +44,15 @@ while (count < 5):
             		data1 = r1.read()
             		word = data1.split()
                     	if "RCFS_SERVER" in word[0]:
-                    		g_server = word[1]
+                    		global g_server = word[1]
                     	if "RCFS_PATH" in word[0]:
-                    		g_path = words[1]
+                    		global g_path = words[1]
                     	if "RCFS_DELAY" in word[0]:
-                    		g_delay = words[1]		
+                    		global g_delay = words[1]		
 			if "RCFS_NAME" in word[0]:
-                    		g_name = words[1]	
+                    		global g_name = words[1]	
 			if "RCFS_DIR_PHOTO" in word[0]:
-                    		g_dir_photo = words[1]	
+                    		global g_dir_photo = words[1]	
             		if g_debug == 'YES':
                 		print data1
         	except:
@@ -61,17 +62,18 @@ while (count < 5):
     	conn.close()
 	
 
-	return
+	return(count)
 
 #---------------------------------------------------
 def getConfiguration(sid):
 #---------------------------------------------------
-	global g_server = RCFS(sid,"SERVER")
-	global g_path   = RCFS(sid,"PATH")
-	global g_delay  = RCFS(sid,"DELAY")
-	global g_name   = RCFS(sid,"NAME")
-	global g_scp    = RFCS(sid,"DIR_PHOTO")
-	return
+	res = 0
+	res = res + RCFS(sid,"SERVER")
+	res = res + RCFS(sid,"PATH")
+	res = res + RCFS(sid,"DELAY")
+	res = res + RCFS(sid,"NAME")
+	res = res + RFCS(sid,"DIR_PHOTO")
+	return(res)
 #---------------------------------------------------
 def getLocalIpAddress():
 #---------------------------------------------------
@@ -86,7 +88,7 @@ def getLocalIpAddress():
      
 	return
 
-getConfiguration(g_sid)
+res = getConfiguration(g_sid)
 getLocalIpAddress()
 g_req = g_path+ "?appid=%d&mid=%d&name=%s&ip=%s&nsid=1&sid1=%d" % (g_swid,g_mid,g_name,g_ipaddress,g_sid)  
 
