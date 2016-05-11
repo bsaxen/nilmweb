@@ -29,9 +29,9 @@ g_scp       = 'folke@nilm.se:/var/www/html/sxn_photo/.'
 #---------------------------------------------------
 def RCFS(sid,par):
 #---------------------------------------------------
-req = g_path+ "?appid=%d&mid=%d&name=%s&ip=%s&nsid=1&sid1=%d" % (g_swid,g_mid,g_name,g_ipaddress,g_sid)     
-while 1:
-	conn = httplib.HTTPConnection(g_server)
+req = "?config=%s&sid=%d" % (par,sid)     
+while config == FALSE:
+	conn = httplib.HTTPConnection(g_sercon)
 	try:
 		conn.request("GET", req)
 		try:
@@ -40,22 +40,22 @@ while 1:
                 		print ("Server Response:-_- %s %s " % (r1.status, r1.reason))
             		data1 = r1.read()
             		# Check if FF_PHOTO
-                    	if "FF_PHOTO" in data1:
-                    		now = time.strftime("%Y-%m-%d-%H-%M-%S")
-				photo_name    = "SW-15-sid%d-%s.jpg" % (g_sid,now)
-				take_photo    = "raspistill -o %s -t 1000pi" % (photo_name)
-				scp_photo     = "scp %s %s" % (photo_name,g_scp)
-                    		os.system(take_photo);
-				os.system(scp_photo);
+                    	if "RCFS_SERVER" in data1:
+                    		
+				
+				
+				
+                    		
+				
             		if g_debug == 'YES':
                 		print data1
         	except:
-            		print '-_- No response from server'
+            		print '-_- No response from config server'
     	except:
-        	print '-_- Not able to connect to server '+g_server
+        	print '-_- Not able to connect to config server ' + g_sercon
     	conn.close()
-	print par
-	print sid
+	
+	
 	return;
 #==================================================
 # RCFS - Read configuration from server
