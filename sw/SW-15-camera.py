@@ -1,7 +1,7 @@
 #!/usr/bin/python
 #==================================================
 # SW-15-camera.py
-# 2016-04-29
+# 2016-05-11
 #
 # Note: This application requres set up of scp without password
 # Client:
@@ -60,25 +60,33 @@ while (count < 5):
         	print '-_- Not able to connect to config server ' + g_sercon
     	conn.close()
 	
-	
-	return;
-#==================================================
-# RCFS - Read configuration from server
-#==================================================
-g_server = RCFS(g_sid,"SERVER")
-g_path   = RCFS(g_sid,"PATH")
-g_delay  = RCFS(g_sid,"DELAY")
-g_name   = RCFS(g_sid,"NAME")
-g_scp    = RFCS(g_sid,"DIR_PHOTO")
-#==================================================
-os.system("ifconfig > ipaddress.work")
-file = open('ipaddress.work','r')
-for line in file:
-    if 'Bcast' in line:
-        words=line.split(' ')
-        work=words[11].split(':')
-        g_ipaddress = work[1] 
-        print 'local ipaddress ' + g_ipaddress
+
+	return
+
+#---------------------------------------------------
+def getConfiguration(sid):
+#---------------------------------------------------
+	g_server = RCFS(sid,"SERVER")
+	g_path   = RCFS(sid,"PATH")
+	g_delay  = RCFS(sid,"DELAY")
+	g_name   = RCFS(sid,"NAME")
+	g_scp    = RFCS(sid,"DIR_PHOTO")
+	return
+#---------------------------------------------------
+def getLocalIpAddress():
+#---------------------------------------------------
+	os.system("ifconfig > ipaddress.work")
+	file = open('ipaddress.work','r')
+	for line in file:
+    		if 'Bcast' in line:
+        		words=line.split(' ')
+        		work=words[11].split(':')
+        		g_ipaddress = work[1] 
+        		print 'local ipaddress ' + g_ipaddress
+	return
+
+getConfiguration(g_sid)
+getLocalIpAddress()
 
 req = g_path+ "?appid=%d&mid=%d&name=%s&ip=%s&nsid=1&sid1=%d" % (g_swid,g_mid,g_name,g_ipaddress,g_sid)     
 while 1:
@@ -98,6 +106,10 @@ while 1:
 				scp_photo     = "scp %s %s" % (photo_name,g_scp)
                     		os.system(take_photo);
 				os.system(scp_photo);
+			if "FF_RECONFIG" in data1:
+				getConfiguration(g_sid)
+			if "FF_LOCAL_IP_UPDATE" in data1:
+				getLocalIpAddress()
             		if g_debug == 'YES':
                 		print data1
         	except:
