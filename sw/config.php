@@ -30,10 +30,10 @@ function getConfigValue($sid,$par)
 
 if(isset($_GET['sid']) && isset($_GET['config']))
 {
-
-$sid    = $_GET['sid'];
-$config = $_GET['config'];
-
+    $sid    = $_GET['sid'];
+    $config = $_GET['config'];
+    $res = getConfigValue($sid,$config);
+    echo("$sid $config $res");
 }
 
 ?>
