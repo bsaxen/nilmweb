@@ -36,42 +36,52 @@ g_ipaddress = 'xx.xx.xx.xx'
 #---------------------------------------------------
 def RCFS(sid,par):
 #---------------------------------------------------
-req = "config.php?config=%s&sid=%d" % (par,sid)     
-count = 0;
+	global g_server
+	global g_path
+	global g_delay
+	global g_name
+	global g_dir_photo
+	req = "/config.php?config=%s&sid=%d" % (par,sid)     
+	count = 0;
 
-while (count < 5):
-	count = count + 1
-	conn = httplib.HTTPConnection(g_sercon)
-	try:
-		conn.request("GET", req)
+	while (count < 5):
+		count = count + 1
+		conn = httplib.HTTPConnection(g_sercon)
 		try:
-			r1 = conn.getresponse()
 			if g_debug == 'YES':
-                		print ("Server Response:-_- %s %s " % (r1.status, r1.reason))
-                	if r1.status == 200:
-                		count = 9
-            			data1 = r1.read()
-            			word = data1.split()
-                    		if "RCFS_SERVER" in word[0]:
-                    			global g_server = word[1]
-                    		if "RCFS_PATH" in word[0]:
-                    			global g_path = words[1]
-                    		if "RCFS_DELAY" in word[0]:
-                    			global g_delay = words[1]		
-				if "RCFS_NAME" in word[0]:
-                    			global g_name = words[1]	
-				if "RCFS_DIR_PHOTO" in word[0]:
-                    			global g_dir_photo = words[1]	
-            			if g_debug == 'YES':
-                			print data1
-        	except:
-            		print '-_- No response from config server'
-    	except:
-        	print '-_- Not able to connect to config server ' + g_sercon
-    	conn.close()
+                		print req
+			conn.request("GET", req)
+			try:
+				r1 = conn.getresponse()
+				if g_debug == 'YES':
+                			print ("Server Response:-_- %s %s " % (r1.status, r1.reason))
+                		if r1.status == 200:
+                			count = 9
+            				data1 = r1.read()
+            				word = data1.split()
+					print word[0]
+                    			if "RCFS_SERVER" in word[1]:
+                    				g_server = word[2]
+                    			if "RCFS_PATH" in word[1]:
+                    				g_path = words[2]
+                    			if "RCFS_DELAY" in word[1]:
+                    				g_delay = words[2]		
+					if "RCFS_NAME" in word[1]:
+                    				g_name = words[2]	
+					if "RCFS_DIR_PHOTO" in word[1]:
+                    				g_dir_photo = words[2]	
+            				if g_debug == 'YES':
+                				print data1
+        		except:
+            			print '-_- No response from config server'
+    		except:
+        		print '-_- Not able to connect to config server ' + g_sercon
+    		conn.close()
 	
-
-	return(count)
+		if g_debug == 'YES':
+                	print count
+			print g_server
+		return(count)
 
 #---------------------------------------------------
 def getConfiguration(sid):
@@ -81,7 +91,7 @@ def getConfiguration(sid):
 	res = res + RCFS(sid,"RCFS_PATH")
 	res = res + RCFS(sid,"RCFS_DELAY")
 	res = res + RCFS(sid,"RCFS_NAME")
-	res = res + RFCS(sid,"RCFS_DIR_PHOTO")
+	res = res + RCFS(sid,"RCFS_DIR_PHOTO")
 	return(res)
 #---------------------------------------------------
 def getLocalIpAddress():
@@ -92,7 +102,7 @@ def getLocalIpAddress():
     		if 'Bcast' in line:
         		words=line.split(' ')
         		work=words[11].split(':')
-        		global g_ipaddress = work[1] 
+        		g_ipaddress = work[1] 
         		print 'local ipaddress ' + g_ipaddress
      
 	return
@@ -100,11 +110,13 @@ def getLocalIpAddress():
 res = getConfiguration(g_sid)
 getLocalIpAddress()
 g_req = g_path+ "?appid=%d&mid=%d&name=%s&ip=%s&nsid=1&sid1=%d" % (g_swid,g_mid,g_name,g_ipaddress,g_sid)  
-
+if g_debug == 'YES':
+	print g_req
+	print g_server
 while 1:
 	conn = httplib.HTTPConnection(g_server)
 	try:
-		conn.request("GET", req)
+		conn.request("GET", g_req)
 		try:
 			r1 = conn.getresponse()
 			if g_debug == 'YES':
