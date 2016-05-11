@@ -75,11 +75,11 @@ while (count < 5):
 def getConfiguration(sid):
 #---------------------------------------------------
 	res = 0
-	res = res + RCFS(sid,"SERVER")
-	res = res + RCFS(sid,"PATH")
-	res = res + RCFS(sid,"DELAY")
-	res = res + RCFS(sid,"NAME")
-	res = res + RFCS(sid,"DIR_PHOTO")
+	res = res + RCFS(sid,"RCFS_SERVER")
+	res = res + RCFS(sid,"RCFS_PATH")
+	res = res + RCFS(sid,"RCFS_DELAY")
+	res = res + RCFS(sid,"RCFS_NAME")
+	res = res + RFCS(sid,"RCFS_DIR_PHOTO")
 	return(res)
 #---------------------------------------------------
 def getLocalIpAddress():
