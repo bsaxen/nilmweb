@@ -43,7 +43,20 @@ function getConfigValue($sid,$par)
 function listAllSids()
 //======================================= 
 {
-    system("ls *.conf > sidList.work");   
+    system("ls *.conf > sidList.work");
+    $handle = fopen("sidList.work", "r");
+    if ($handle) 
+    {    
+        while (($line = fgets($handle)) !== false) 
+        {
+            $line = trim($line);
+         
+            echo("<a href=\"config.php?do=updateSidConf&sid=$sid\">$line</a> <br>");
+        }
+        fclose($handle);
+    } 
+
+    
 }
 //=======================================
 function createSidConfig($sid)
