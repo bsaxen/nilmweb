@@ -125,29 +125,9 @@ res = getConfiguration(g_sid)
 getLocalIpAddress()
 g_req = g_path+ "?appid=%d&mid=%d&name=%s&ip=%s&nsid=1&sid1=%d" % (g_swid,g_mid,g_name,g_ipaddress,g_sid)  
 
-#==================================================
-# Read configuration
-#==================================================
-g_sid       = 901
-g_mid       = 6
-g_swid      = 16
-g_debug     = 'YES';
-g_server    = '78.67.160.17'
-g_path      = '/sxndata/index.php'
-g_ipaddress = 'xx.xx.xx.xx'
-g_delay     = 10
-g_name      = 'SW-16-client-status'
-#==================================================
-os.system("ifconfig > ipaddress.work")
-file = open('ipaddress.work','r')
-for line in file:
-    if 'Bcast' in line:
-        words=line.split(' ')
-        work=words[11].split(':')
-        g_ipaddress = work[1] 
-        print 'local ipaddress ' + g_ipaddress
 
-req = g_path+ "?appid=%d&mid=%d&name=%s&ip=%s&nsid=1&sid1=%d" % (g_swid,g_mid,g_name,g_ipaddress,g_sid) 
+
+
 GPIO.output(led_green,False)
 GPIO.output(led_red,False)
 GPIO.output(led_yellow,False)
@@ -155,7 +135,7 @@ while 1:
 	GPIO.output(led_yellow,True)
 	conn = httplib.HTTPConnection(g_server)
 	try:
-		conn.request("GET", req)
+		conn.request("GET", g_req)
 		try:
 			r1 = conn.getresponse()
 			GPIO.output(led_yellow,False)
