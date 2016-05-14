@@ -19,7 +19,7 @@ g_sid       = 901
 g_mid       = 3
 g_swid      = 15
 g_sercon    = '78.67.160.17'
-g_debug     = 'YES';
+g_debug     = 'NO';
 #==================================================
 # Soft configuration
 #==================================================
@@ -96,6 +96,7 @@ def getConfiguration(sid):
 #---------------------------------------------------
 def getLocalIpAddress():
 #---------------------------------------------------
+	global g_ipaddress
 	os.system("ifconfig > ipaddress.work")
 	file = open('ipaddress.work','r')
 	for line in file:
@@ -127,7 +128,7 @@ while 1:
                     		now = time.strftime("%Y-%m-%d-%H-%M-%S")
 				photo_name    = "SW-15-sid%d-%s.jpg" % (g_sid,now)
 				take_photo    = "raspistill -o %s -t 1000pi" % (photo_name)
-				scp_photo     = "scp %s %s" % (photo_name,g_scp)
+				scp_photo     = "scp %s %s" % (photo_name,g_dir_photo)
                     		os.system(take_photo);
 				os.system(scp_photo);
 			if "FF_RECONFIG" in data1:
