@@ -1,27 +1,62 @@
 //==================================================
-// SW-12-temperature.ino
-// 2016-04-10
+// SW-19-scale.ino
+// 2016-05-18
 //==================================================
-int app_id = 12;
+int app_id = 19;
 //==================================================
 // Configuration
 //==================================================
 int g_debug              = 0;
-const char* g_clientName = "SW-12";
-const char* g_confServer = "sercon.simuino.com";
-byte mac[] = { 0xDE, 0xAD, 0xBE, 0xEF, 0xFE, 0xED };
 int g_device_delay       = 20;
 //==================================================
+ #define PIN_LED_STATUS 13
+//==================================================
+// Nabton Client Application Configuration
+//==================================================
+ 
+  // Big display
+  //int   zero_level  = 1290;
+  //float refKg       = 86.7;
+  //int   refValue    = 3030; 
+  //float noice_level = 0.1;
+  // Small display
+  int   zero_level  = 725;
+  float refKg       = 86.7;
+  int   refValue    = 2026; 
+  float noice_level = 0.2;
+  #define N_FILTER 5
+  #define N_LEDS 3
+
+int g_led[10];
+int cur;
+int g_selected_sid;
+
+
+int g_sid;
+float factor;
+float oldTs,newTs;
+int value = HIGH;
+int nvalue = 0;
+int count = 0;
+float oldw[10];
+float sum,ftemp,weight = 0.0;
+int ready = 0;
+int sid[10];
+ 
+#define PIN_LED_ARM   3
+#define PIN_LED_MSG   4
+#define PIN_INTERRUPT 2
+#define PIN_SIGNAL   12
+#define PIN_LED_SID1  5
+#define PIN_LED_SID2  6
+#define PIN_LED_SID3  7
+#define PIN_BUTTON_1 10
+#define PIN_BUTTON_2 11
+
+
 #define NFLOAT 2  // No of decimals i float value
 #define SIDN 2    // No of SIDs
 #define SID1 901  
-#define SID2 902  
-#define SID3 903  
-#define SID4 904  
-#define SID5 905 
-#define SID6 906
-#define SID7 907
-#define SID8 908
 
 #define greenLed  13
 #define yellowLed 12
@@ -67,24 +102,9 @@ char g_rbuf[4000];
 // D20 SDA I2C OLED
 // D21 SCL I2C OLED
 //=================================================
-//==================================================
-// Nabton Client Application Configuration
-//==================================================
-#include <OneWire.h>
-#include <DallasTemperature.h>
 #include <SoftwareSerial.h>
 #include <U8glib.h>
 
-//=================================================
-// One Wire
-//=================================================
-
-#define ONE_WIRE_BUS 9
-#define TEMPERATURE_PRECISION 12
-OneWire oneWire(ONE_WIRE_BUS);
-DallasTemperature sensors(&oneWire);
-DeviceAddress device[MAX_SID];
-int nsensors = 0;
 
 //=================================================
 void software_Reset() // Restarts program from beginning but does not reset the peripherals and registers
@@ -256,219 +276,6 @@ void clearOled()
     strcpy(dr[i]," ");
   }
 }
-
-//=================================================
-void setup()
-//================================================= 
-{
-  int i;
-  float tempC;  
-  String str;
-  Serial.begin(9600);
-  NB_serialFlush();
-  
-  pinMode(greenLed,          OUTPUT);
-  pinMode(redLed,            OUTPUT);
-  pinMode(yellowLed,         OUTPUT);
-
-  digitalWrite(greenLed,  HIGH); //Device ON
-  digitalWrite(redLed,    HIGH); //No Server
-  digitalWrite(yellowLed, HIGH); //No Network
-  // OLED
-//=================================================
-
-  if ( u8g.getMode() == U8G_MODE_R3G3B2 ) {
-    u8g.setColorIndex(255);     // white
-  }
-  else if ( u8g.getMode() == U8G_MODE_GRAY2BIT ) {
-    u8g.setColorIndex(3);         // max intensity
-  }
-  else if ( u8g.getMode() == U8G_MODE_BW ) {
-    u8g.setColorIndex(1);         // pixel on
-  }
-  else if ( u8g.getMode() == U8G_MODE_HICOLOR ) {
-    u8g.setHiColorByRGB(255,255,255);
-  }
-  clearOled();
-// One Wire
-//=================================================
-  digitalWrite(greenLed, HIGH); //Device ON
-  sprintf(dl[1],"%s",g_clientName);
-  sprintf(dr[2],"n");
-  sprintf(dr[3],"c");
-  sprintf(dr[4],"s");
-  sensors.begin();
-  nsensors = sensors.getDeviceCount();
-  sprintf(dr[1],"%2d",nsensors);
-  NB_oledDraw();
-  
-//  if(nsensors > 0)
-//  {
-//    for(i=0;i<nsensors;i++)
-//    {
-//      sensors.getAddress(device[i], i);
-//      sensors.setResolution(device[i], TEMPERATURE_PRECISION);
-//    }
-//  }
-//
-//  sensors.requestTemperatures();
-//  for(i=1;i<=nsensors;i++)
-//  {
-//      tempC = sensors.getTempC(device[i-1]);    
-//      str = String(tempC);
-//      str.toCharArray(dl[i],8); 
-//  }
-//  g_sids[1] = SID1;
-//  g_sids[2] = SID2;
-//  g_sids[3] = SID3;
-//  g_sids[4] = SID4;
-//  g_sids[5] = SID5;
-//  g_sids[6] = SID6;
-//  g_sids[7] = SID7;
-//  g_sids[8] = SID8;
-//  
-//  sprintf(dr[1],"%d",g_device_delay);
-//  for(i=1;i<=SIDN;i++)
-//  {
-//    sprintf(dm[i],"%d",g_sids[i]);
-//  }
-//  NB_oledDraw();
-
-}
-//=================================================
-void loop()
-//=================================================
-{
-  int i;
-  float tempC;
-  String str;
-
-    sprintf(dm[1],"%3d",g_device_delay);
-    sprintf(dl[3],"%s",g_server);
-    
-    sensors.requestTemperatures();
-    for(i=0;i<nsensors;i++)
-    {
-      sprintf(dl[4],"%3d",g_sids[i+1]);
-      tempC = sensors.getTempCByIndex(i);
-      dtostrf(tempC,5, NFLOAT, dm[4]);
-      if(tempC != -127)i = NB_sendToGwy(NABTON_DATA,g_sids[i+1],tempC,i);
-      //strcpy(dm[i+1],"*"); 
-      NB_oledDraw();
-      delay(2000);  
-      recSerial();
-      sprintf(dl[4],"%d",g_sids[i+1]);
-      NB_oledDraw();
-    }
-    delay(g_device_delay*1000);   
-}
-
-//==================================================
-// D_NC_scale.ino
-// 2015-01-28
-// Version 0.1
-//==================================================
-// Nabton Client Generic Configuration
-//==================================================
- #define NABTON_DATA 1
-
- #define SIDN  3
- #define SID1 901
- #define SID2 902
- #define SID3 903
- 
- #define PIN_LED_STATUS 13
-//==================================================
-// Nabton Client Application Configuration
-//==================================================
- 
-  // Big display
-  //int   zero_level  = 1290;
-  //float refKg       = 86.7;
-  //int   refValue    = 3030; 
-  //float noice_level = 0.1;
-  // Small display
-  int   zero_level  = 725;
-  float refKg       = 86.7;
-  int   refValue    = 2026; 
-  float noice_level = 0.2;
-  #define N_FILTER 5
-  #define N_LEDS 3
-
-int g_led[10];
-int cur;
-int g_selected_sid;
-
-
-int g_sid;
-float factor;
-float oldTs,newTs;
-int value = HIGH;
-int nvalue = 0;
-int count = 0;
-float oldw[10];
-float sum,ftemp,weight = 0.0;
-int ready = 0;
-int sid[10];
- 
-#define PIN_LED_ARM   3
-#define PIN_LED_MSG   4
-#define PIN_INTERRUPT 2
-#define PIN_SIGNAL   12
-#define PIN_LED_SID1  5
-#define PIN_LED_SID2  6
-#define PIN_LED_SID3  7
-#define PIN_BUTTON_1 10
-#define PIN_BUTTON_2 11
-
-
-//=================================================
-void sendNDS(int sid, float data)
-//=================================================
-{
-  Serial.print(NABTON_DATA);
-  Serial.print(" "); 
-  Serial.print(sid);
-  Serial.print(" "); 
-  Serial.print(data);
-  Serial.print(";"); 
-  Serial.flush();
-}
-//=================================================
-void setLed(int led)
-//=================================================
-{
-  for (int i=1;i<=N_LEDS;i++)
-  {
-    digitalWrite(g_led[i],LOW);
-  }
-  digitalWrite(g_led[led],HIGH);
-  g_selected_sid = led;
-}
-//=================================================
-int selectSid()
-//=================================================
-{
-  while(digitalRead(PIN_BUTTON_1) == LOW)
-  {
-    int x2 = digitalRead(PIN_BUTTON_2);
-    int par = x2;
-  
-    switch(par)
-    {
-     case 0 :
-       break;
-     case 1 :
-       cur++;
-       if(cur > N_LEDS)cur=1;
-       setLed(cur);
-       break;
-     default :
-      Serial.println("This will not happen\n" );
-    }
-    delay(150); 
-  }
-}
 //=================================================
 void stamp()
 //=================================================
@@ -515,61 +322,58 @@ void stamp()
   }
 }
 //=================================================
-void establishContact() 
+void setLed(int led)
 //=================================================
 {
- while (Serial.available() <= 0) 
- {
-    Serial.print("X;"); 
-    digitalWrite(PIN_LED_STATUS,HIGH);  delay(200);
-    delay(300);
-    digitalWrite(PIN_LED_STATUS,LOW);   delay(200);
+  for (int i=1;i<=N_LEDS;i++)
+  {
+    digitalWrite(g_led[i],LOW);
   }
-  //char x = Serial.read();
+  digitalWrite(g_led[led],HIGH);
+  g_selected_sid = led;
 }
 //=================================================
-void setup() {
+int selectSid()
+//=================================================
+{
+  while(digitalRead(PIN_BUTTON_1) == LOW)
+  {
+    int x2 = digitalRead(PIN_BUTTON_2);
+    int par = x2;
+  
+    switch(par)
+    {
+     case 0 :
+       break;
+     case 1 :
+       cur++;
+       if(cur > N_LEDS)cur=1;
+       setLed(cur);
+       break;
+     default :
+      Serial.println("This will not happen\n" );
+    }
+    delay(150); 
+  }
+}
+
+//=================================================
+void setup()
 //================================================= 
-    
+{
   int i;
-  
-  g_led[1] = 5;
-  g_led[2] = 6;
-  g_led[3] = 7;  
-  
-  sid[0] = SIDN;
-  sid[1] = SID1;
-  sid[2] = SID2;
-  sid[3] = SID3;
-  
+  float tempC;  
+  String str;
   Serial.begin(9600);
-
-  pinMode(PIN_LED_STATUS, OUTPUT);
-
-  pinMode(PIN_SIGNAL,     INPUT);
-  pinMode(PIN_LED_ARM,    OUTPUT);
-  pinMode(PIN_LED_MSG,    OUTPUT);
-  pinMode(PIN_INTERRUPT,  OUTPUT);
-  pinMode(PIN_LED_SID1,   OUTPUT);
-  pinMode(PIN_LED_SID2,   OUTPUT);
-  pinMode(PIN_LED_SID3,   OUTPUT);
-  pinMode(PIN_BUTTON_1,   INPUT);
-  pinMode(PIN_BUTTON_2,   INPUT);
+  NB_serialFlush();
   
-  digitalWrite(4,HIGH);  delay(200);
-  digitalWrite(5,HIGH);  delay(200);
-  digitalWrite(6,HIGH);  delay(200);
-  digitalWrite(7,HIGH);  delay(200);
+  pinMode(greenLed,          OUTPUT);
+  pinMode(redLed,            OUTPUT);
+  pinMode(yellowLed,         OUTPUT);
 
-  digitalWrite(4,LOW);   delay(200);
-  digitalWrite(5,LOW);   delay(200);
-  digitalWrite(6,LOW);   delay(200);
-  digitalWrite(7,LOW);   delay(200);
-
-  digitalWrite(PIN_LED_MSG,LOW);
-  digitalWrite(PIN_LED_ARM,LOW);
-  digitalWrite(PIN_LED_SID1,LOW);
-  digitalWrite(PIN_LED_SID2,LOW);
+  digitalWrite(greenLed,  HIGH); //Device ON
+  digitalWrite(redLed,    HIGH); //No Server
+  digitalWrite(yellowLed, HIGH); //No Network
   
   attachInterrupt(0, stamp, FALLING);
   for(i=N_FILTER;i>0;i--)oldw[i] =0.;  
@@ -582,14 +386,53 @@ void setup() {
   g_selected_sid = selectSid();
   
   tone(PIN_INTERRUPT, 32767);
+  // OLED
+//=================================================
 
+  if ( u8g.getMode() == U8G_MODE_R3G3B2 ) {
+    u8g.setColorIndex(255);     // white
+  }
+  else if ( u8g.getMode() == U8G_MODE_GRAY2BIT ) {
+    u8g.setColorIndex(3);         // max intensity
+  }
+  else if ( u8g.getMode() == U8G_MODE_BW ) {
+    u8g.setColorIndex(1);         // pixel on
+  }
+  else if ( u8g.getMode() == U8G_MODE_HICOLOR ) {
+    u8g.setHiColorByRGB(255,255,255);
+  }
+  clearOled();
+// One Wire
+//=================================================
+  digitalWrite(greenLed, HIGH); //Device ON
+  sprintf(dl[1],"%s",g_clientName);
+  sprintf(dr[2],"n");
+  sprintf(dr[3],"c");
+  sprintf(dr[4],"s");
+  
+  NB_oledDraw();
 }
-
 //=================================================
 void loop()
 //=================================================
 {
-      digitalWrite(PIN_LED_ARM,HIGH);
+  int i;
+  float tempC;
+  String str;
+
+    sprintf(dm[1],"%3d",g_device_delay);
+    sprintf(dl[3],"%s",g_server);
+      sprintf(dl[4],"%3d",g_sids[i+1]);
+      dtostrf(tempC,5, NFLOAT, dm[4]);
+      i = NB_sendToGwy(NABTON_DATA,g_sids[i+1],tempC,i);
+      NB_oledDraw();
+      delay(2000);  
+      recSerial();
+      sprintf(dl[4],"%d",g_sids[i+1]);
+      NB_oledDraw();
+
+    delay(g_device_delay*1000);   
+         digitalWrite(PIN_LED_ARM,HIGH);
       if(weight > 4.0)
       {
        int s = sid[g_selected_sid];
