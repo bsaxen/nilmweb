@@ -5,7 +5,7 @@
 //==================================================
 #include <U8glib.h>
 
-int oneLed    = 13;
+int oneLed    = 11;
 int detectLed = 13;
 char appName[30] = {"AUTOMOWER"};
 //==================================================
@@ -66,31 +66,41 @@ void clearOled()
 void detect()
 //================================================= 
 {
-  int i,tmax=0,xmax = 30,nmax = 0,prev = 0,ifreq = 0;
-  int x,x1=0,x2=0,x3=0,ax;
+  int i,tmax=0,nmax = 0,prev = 0,ifreq = 0;
+  int x,x1=0,x2=0,x3=0,x4=0,x5=0,x6=0,x7=0,ax;
+  int lowLevel=1, highLevel=60;
+  int sig = 0;
   float freq;
   digitalWrite(detectLed, HIGH);
   for(i=1;i<=10000;i++)
   {
-    //digitalWrite(oneLed, LOW); 
+    //digitalWrite(oneLed, HIGH); 
     int x = analogRead(A0);
-    ax = (x+x1+x2)/3;
+    //digitalWrite(oneLed, LOW); 
+    ax = (x)/1;
     if(tmax < ax)tmax = ax;
-    if(ax > xmax)
+    if(ax < lowLevel && sig == 0) // signal on
     {
+      digitalWrite(oneLed, HIGH); 
+      sig = 1;
       nmax++;
       ifreq = ifreq + (i - prev);
       prev = i;
+    }
+    if(ax > highLevel && sig == 1)
+    {
+      sig = 0;
+      digitalWrite(oneLed, LOW); 
     }
     x2 = x1;
     x1 = x;
     //Serial.println(x); 
   }
   freq = (float)ifreq/nmax;
-  sprintf(dm[2],"%d",xmax);
-  sprintf(dr[2],"%d",nmax);
-  sprintf(dr[4],"%d",(int)freq);
+  sprintf(dm[2],"%d",highLevel);sprintf(dr[2],"%d",nmax);
   sprintf(dr[3],"%d",tmax);
+  sprintf(dr[4],"%d",(int)freq);
+ 
   digitalWrite(detectLed, LOW);
 }
 //=================================================
