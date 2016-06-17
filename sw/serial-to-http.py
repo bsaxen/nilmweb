@@ -1,7 +1,7 @@
 #!/usr/bin/python
 #==================================================
 # serial-to-http.py
-# 2016-04-05
+# 2016-06-17
 #==================================================
 # apt-get install python-pip
 # pip install pyserial
@@ -12,7 +12,7 @@ import os
 #==================================================
 # Read configuration
 #==================================================
-print 'Version 2016-04-05'
+print 'Version 2016-06-17'
 sxn_debug = 'YES';
 sxn_server = '78.67.160.17'
 sxn_sercon = 'config.nabton.com'
