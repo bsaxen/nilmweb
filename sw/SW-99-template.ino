@@ -18,6 +18,9 @@ int g_sw_id = 99;
 #define NFLOAT 2    // No of decimals i float value
 #define MAX_SID 10 
 int g_sid[MAX_SID] = {2,901,902,903,904,905,906,907,908};
+#define greenLed  13
+#define yellowLed 12
+#define redLed     5
 
 //=================================================
 //
@@ -61,7 +64,7 @@ void blinkLed(int led,int number, int onTime)
   for(i=0;i<number;i++)
   {
     digitalWrite(led,HIGH);
-    delay(onTime);
+    delay(100);
     digitalWrite(led,LOW);
     delay(onTime);
   }
@@ -145,17 +148,16 @@ void recSerial()
      digitalWrite(redLed,HIGH); 
      Serial.readBytes(nbbuff,nx);
      sscanf(nbbuff,"%d %d",&mid,&sid);
-     sprintf(dr[3],"%d",nx);
+  
      if(sid == SID1) // Check if control sid correct
      {
        if(strstr(nbbuff,"DELAY") != NULL)
        {
-          strcpy(dr[3],"DLY");
+      
           sscanf(nbbuff,"%d %d %s %d",&mid,&sid,command,&g_device_delay);
-          sprintf(dr[1],"%d",g_device_delay);
+      
        }
-       strcpy(dr[4],"-");
-       NB_oledDraw();
+
      }
      digitalWrite(redLed,LOW); 
   }
