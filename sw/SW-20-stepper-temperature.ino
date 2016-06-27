@@ -1,16 +1,12 @@
 //==================================================
-// sxn_stepper_temperature.ino
+// SW-20-stepper-temperature.ino
 //==================================================
-// History
+int app_id = 20;
 //==================================================
-// Software Id: 11201 2015-11-21	First version
-// 2015-12-09: support sidApp controlSaxenHeater
-// 2015-12-18: increased stepper resolution, corrected NB_sendToGateway
-// 2016-01-10: Correction of receiving serial for stepper
+// Configuration
 //==================================================
-#define SWID 2015
-#define DEVID 0110 
-#define SIDN  4   // No of SIDs
+#define NFLOAT 2
+#define SIDN  2   // No of SIDs
 #define SID1 1  
 #define SID2 2  
 #define SID3 3 
