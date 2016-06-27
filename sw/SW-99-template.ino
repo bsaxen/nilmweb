@@ -186,26 +186,19 @@ void loop()
 //=================================================
 {
   int i;
-  float tempC;
+  float value;
   String str;
 
-    sprintf(dm[1],"%3d",g_device_delay);
-    sprintf(dl[3],"%s",g_server);
-    
-    sensors.requestTemperatures();
-    for(i=0;i<nsensors;i++)
-    {
+
       sprintf(dl[4],"%3d",g_sids[i+1]);
       tempC = sensors.getTempCByIndex(i);
       dtostrf(tempC,5, NFLOAT, dm[4]);
-      if(tempC != -127)i = NB_sendToGwy(NABTON_DATA,g_sids[i+1],tempC,i);
-      //strcpy(dm[i+1],"*"); 
-      NB_oledDraw();
+      i = NB_sendToGwy(NABTON_DATA,g_sids[i+1],tempC,i);
+
       delay(2000);  
       recSerial();
-      sprintf(dl[4],"%d",g_sids[i+1]);
-      NB_oledDraw();
-    }
+
+    
     delay(g_device_delay*1000);   
 
 }
