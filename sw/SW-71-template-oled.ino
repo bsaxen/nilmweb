@@ -1,13 +1,13 @@
 //==================================================
-// SW-12-temperature.ino
-// 2016-04-10
+// SW-71-template-oled.ino
+// 2016-06-28
 //==================================================
-int app_id = 12;
+int app_id = 71;
 //==================================================
 // Configuration
 //==================================================
 int g_debug              = 0;
-const char* g_clientName = "SW-12";
+const char* g_clientName = "SW-71";
 const char* g_confServer = "sercon.simuino.com";
 byte mac[] = { 0xDE, 0xAD, 0xBE, 0xEF, 0xFE, 0xED };
 int g_device_delay       = 20;
@@ -137,9 +137,7 @@ void clearOled()
 void setup()
 //================================================= 
 {
-  int i;
-  float tempC;  
-  String str;
+  
   Serial.begin(9600);
   NB_serialFlush();
   
@@ -173,33 +171,17 @@ void setup()
   sprintf(dr[2],"n");
   sprintf(dr[3],"c");
   sprintf(dr[4],"s");
-  sensors.begin();
-  nsensors = sensors.getDeviceCount();
-  sprintf(dr[1],"%2d",nsensors);
+ 
   NB_oledDraw();
 }
 //=================================================
 void loop()
 //=================================================
 {
-  int i;
-  float tempC;
-  String str;
-
-    sprintf(dm[1],"%3d",g_device_delay);
-    sprintf(dl[3],"%s",g_server);
-    
-    sensors.requestTemperatures();
-    for(i=0;i<nsensors;i++)
-    {
-      sprintf(dl[4],"%3d",g_sids[i+1]);
-      tempC = sensors.getTempCByIndex(i);
-      dtostrf(tempC,5, NFLOAT, dm[4]);
-      if(tempC != -127)i = NB_sendToGwy(NABTON_DATA,g_sids[i+1],tempC,i);
-      //strcpy(dm[i+1],"*"); 
+  
       NB_oledDraw();
       delay(2000);  
-      recSerial();
+     
       sprintf(dl[4],"%d",g_sids[i+1]);
       NB_oledDraw();
     }
