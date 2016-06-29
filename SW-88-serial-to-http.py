@@ -1,7 +1,7 @@
 #!/usr/bin/python
 #==================================================
-# serial-to-http.py
-# 2016-06-17
+# SW-88-serial-to-http.py
+# 2016-06-29
 #==================================================
 # apt-get install python-pip
 # pip install pyserial
