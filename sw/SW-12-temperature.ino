@@ -1,16 +1,14 @@
 //==================================================
 // SW-12-temperature.ino
-// 2016-04-10
+// 2016-07-02
 //==================================================
-int app_id = 12;
+int g_app_id = 12;
 //==================================================
 // Configuration
 //==================================================
-int g_debug              = 0;
-const char* g_clientName = "SW-12";
-const char* g_confServer = "sercon.simuino.com";
-byte mac[] = { 0xDE, 0xAD, 0xBE, 0xEF, 0xFE, 0xED };
-int g_device_delay       = 20;
+int g_debug               = 0;
+int g_device_delay        = 20;
+const char* g_clientName = "SW-12 Test";
 //==================================================
 #define NFLOAT 2  // No of decimals i float value
 #define SIDN 2    // No of SIDs
@@ -29,9 +27,7 @@ int g_device_delay       = 20;
 //==================================================
 #define MAX_SID 8
 #define MAX_ORDERS 100
-char g_server[120]; 
-int g_sids[10] = {SIDN,SID1,SID2,SID3,SID4,SID5,SID6,SID7,SID8};
-char g_sIp[80];
+int  g_sids[10] = {SIDN,SID1,SID2,SID3,SID4,SID5,SID6,SID7,SID8};
 char g_rbuf[4000];
 
 // Arduino-RPi protocol
@@ -50,7 +46,7 @@ char g_rbuf[4000];
 // D6 DIR Stepper
 // D7 STEP Stepper
 // D8 SLEEP Stepper
-// D9 One Wire Data
+// D9 One Wire Data - 4.7 kOhm pullup
 // D10  RX Bluetooth device
 // D11  TX Bluetooth device
 // D12  Yellow LED
@@ -167,7 +163,7 @@ int NB_sendToGwy(int mid, int sid, float data, int other)
      strcpy(msg2," ");
      digitalWrite(yellowLed,HIGH);
      // Mandatory part of message
-     sprintf(msg1,"?sw=%d&mid=%d&nsid=%d&sid1=%d",app_id,mid,1,sid);
+     sprintf(msg1,"?appid=%d&mid=%d&nsid=%d&sid1=%d",g_app_id,mid,1,sid);
 if(g_debug==1){Serial.print("data:");Serial.println(data);}      
      if(mid == NABTON_DATA)
      {
@@ -225,19 +221,19 @@ void recSerial()
   
   if (nx > 0) 
   {
+     strcpy(dr[3],"-");
      digitalWrite(redLed,HIGH); 
      Serial.readBytes(nbbuff,nx);
      sscanf(nbbuff,"%d %d",&mid,&sid);
-     sprintf(dr[3],"%d",nx);
+     sprintf(dl[3],"%d",nx);
      if(sid == SID1) // Check if control sid correct
      {
        if(strstr(nbbuff,"DELAY") != NULL)
        {
           strcpy(dr[3],"DLY");
           sscanf(nbbuff,"%d %d %s %d",&mid,&sid,command,&g_device_delay);
-          sprintf(dr[1],"%d",g_device_delay);
+          sprintf(dr[2],"%d",g_device_delay);
        }
-       strcpy(dr[4],"-");
        NB_oledDraw();
      }
      digitalWrite(redLed,LOW); 
@@ -272,8 +268,8 @@ void setup()
   pinMode(yellowLed,         OUTPUT);
 
   digitalWrite(greenLed,  HIGH); //Device ON
-  digitalWrite(redLed,    HIGH); //No Server
-  digitalWrite(yellowLed, HIGH); //No Network
+  digitalWrite(redLed,    LOW); //Message received
+  digitalWrite(yellowLed, LOW); //Message sent
   // OLED
 //=================================================
 
@@ -294,45 +290,22 @@ void setup()
 //=================================================
   digitalWrite(greenLed, HIGH); //Device ON
   sprintf(dl[1],"%s",g_clientName);
-  sprintf(dr[2],"n");
-  sprintf(dr[3],"c");
-  sprintf(dr[4],"s");
+  sprintf(dr[2],"-");
+  sprintf(dr[3],"-");
+  sprintf(dr[4],"-");
   sensors.begin();
   nsensors = sensors.getDeviceCount();
   sprintf(dr[1],"%2d",nsensors);
   NB_oledDraw();
   
-//  if(nsensors > 0)
-//  {
-//    for(i=0;i<nsensors;i++)
-//    {
-//      sensors.getAddress(device[i], i);
-//      sensors.setResolution(device[i], TEMPERATURE_PRECISION);
-//    }
-//  }
-//
-//  sensors.requestTemperatures();
-//  for(i=1;i<=nsensors;i++)
-//  {
-//      tempC = sensors.getTempC(device[i-1]);    
-//      str = String(tempC);
-//      str.toCharArray(dl[i],8); 
-//  }
-//  g_sids[1] = SID1;
-//  g_sids[2] = SID2;
-//  g_sids[3] = SID3;
-//  g_sids[4] = SID4;
-//  g_sids[5] = SID5;
-//  g_sids[6] = SID6;
-//  g_sids[7] = SID7;
-//  g_sids[8] = SID8;
-//  
-//  sprintf(dr[1],"%d",g_device_delay);
-//  for(i=1;i<=SIDN;i++)
-//  {
-//    sprintf(dm[i],"%d",g_sids[i]);
-//  }
-//  NB_oledDraw();
+  if(nsensors > 0)
+  {
+    for(i=0;i<nsensors;i++)
+    {
+      sensors.getAddress(device[i], i);
+      sensors.setResolution(device[i], TEMPERATURE_PRECISION);
+    }
+  }
 
 }
 //=================================================
@@ -343,9 +316,8 @@ void loop()
   float tempC;
   String str;
 
-    sprintf(dm[1],"%3d",g_device_delay);
-    sprintf(dl[3],"%s",g_server);
-    
+    sprintf(dr[2],"%3d",g_device_delay);
+     
     sensors.requestTemperatures();
     for(i=0;i<nsensors;i++)
     {
@@ -362,4 +334,3 @@ void loop()
     }
     delay(g_device_delay*1000);   
 }
-
