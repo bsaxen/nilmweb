@@ -49,19 +49,17 @@ for line in file:
         sxn_ipaddress = work[1] 
         print 'local ipaddress ' + sxn_ipaddress
 #==================================================
-def pulseEvent(x):
+def doorOpen(x):
 	global t1,t2,dt,log_file,nb_server,p1,p2,dp
-	nb_warning = '-'
 	t2 = t1
 	t1 = time.time()
 	dt = t1 - t2
-	elpow = 3600/dt
 
 	if log_server == 1:
 		GPIO.output(18,True)
 		p1 = time.time()
 		conn = httplib.HTTPConnection(ip_server)
-		t_req = "/sxndata/index.php?appid=10&mid=1&name=%s&ip=%s&nsid=1&sid1=%d&dat1=%.2f" % (app_id,meas_name,sxn_ipaddress,sid,elpow)
+		t_req = "/index.php?appid=10&mid=1&name=%s&ip=%s&nsid=1&sid1=%d&dat1=1.0" % (app_id,meas_name,sxn_ipaddress,sid)
 		try:
 			conn.request("GET", t_req)
 			try:
@@ -75,21 +73,18 @@ def pulseEvent(x):
 		conn.close()
 		p2 = time.time()
 		dp = p2 - p1
-		maxpow = 36000/dp
-		if maxpow < elpow:
-			nb_warning = '**** Slow connection ****'
 		
 	if log_local == 1:
 		GPIO.output(12,True)
 		with open(log_file, 'a') as out_file:
 			ts = datetime.datetime.fromtimestamp(t1).strftime('%H:%M:%S')
-			out_file.write("%s %.3f %.3f %s\n" % (ts,elpow,dp,nb_warning))
+			out_file.write("%s OPEN %.3f %s\n" % (ts,elpow,dp,nb_warning))
 			out_file.close()
 			GPIO.output(12,False)
 
 #==================================================
 # Interrupt
-GPIO.add_event_detect(16, GPIO.FALLING, callback=pulseEvent,bouncetime=boti)
+GPIO.add_event_detect(16, GPIO.FALLING, callback=doorOpen,bouncetime=boti)
 #==================================================
 while True:
 	try:
