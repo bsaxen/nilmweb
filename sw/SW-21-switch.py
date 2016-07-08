@@ -14,7 +14,7 @@ GPIO.setup(12, GPIO.OUT) # Write file led
 GPIO.setup(16, GPIO.IN, pull_up_down=GPIO.PUD_UP)
 GPIO.setup(18, GPIO.OUT) # HTTP req led
 #-------------------
-#	3.3		5.0	-------->to 5.0 v
+#	3.3		5.0	-------->to 3.3 v
 #	-		-	
 #	-		GND	-------->to ground
 #	7		8
@@ -33,12 +33,12 @@ dp = 0
 #==================================================
 # Configuration
 #==================================================
-sid        = 901
+sid        = 308
 boti       = 100
-ip_server  = 'server ip address'
+ip_server  = 'data.nabton.com'
 log_local  = 1
 log_server = 1
-meas_name  = 'measurement tag'
+meas_name  = 'garage_nytomta'
 #==================================================
 os.system("ifconfig > ipaddress.work")
 file = open('ipaddress.work','r')
