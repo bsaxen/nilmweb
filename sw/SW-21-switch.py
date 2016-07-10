@@ -13,6 +13,7 @@ GPIO.setmode(GPIO.BOARD)
 GPIO.setup(12, GPIO.OUT) # Write file led
 GPIO.setup(16, GPIO.IN, pull_up_down=GPIO.PUD_UP)
 GPIO.setup(18, GPIO.OUT) # HTTP req led
+GPIO-setup(22, GPIO.OUT)
 #-------------------
 #	3.3		5.0	-------->to 3.3 v
 #	-		-	
@@ -23,6 +24,8 @@ GPIO.setup(18, GPIO.OUT) # HTTP req led
 #	-		-
 #	-		16	-------->to signal
 #	-		18	-------->to LED (HTTP request)
+#	-		20
+#	-		22	-------->to LED (status switch)
 #-------------------
 t1 = 0
 t2 = 0
@@ -40,6 +43,9 @@ log_local  = 1
 log_server = 1
 meas_name  = 'your_switch'
 #==================================================
+GPIO.output(12,False)
+GPIO.output(18,False)
+GPIO.output(22,False)
 os.system("ifconfig > ipaddress.work")
 file = open('ipaddress.work','r')
 for line in file:
@@ -95,6 +101,10 @@ while True:
 		today = datetime.date.today()
 		log_file = "data-%d-%s.nbc" % (sid,today)
 		time.sleep(1)
+		if(switch_status == 1):
+			GPIO.output(22,True) # closed
+		else:
+			GPIO.output(22,False) # open
 	except KeyboardInterrupt:
 		GPIO.cleanup()
 		quit()
