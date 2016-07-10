@@ -43,6 +43,10 @@ log_local  = 1
 log_server = 1
 meas_name  = 'your_switch'
 #==================================================
+GPIO.output(12,True)
+GPIO.output(18,True)
+GPIO.output(22,True)
+time.sleep(1)
 GPIO.output(12,False)
 GPIO.output(18,False)
 GPIO.output(22,False)
@@ -62,8 +66,10 @@ def doorOpen(x):
 	dt = t1 - t2
 	if GPIO.input(16):
 		switch_status = 1 # Closed
+		GPIO.output(22,True)
 	else:
 		switch_status = 0 # Open
+		GPIO.output(22,False)
 		
 	if log_server == 1:
 		GPIO.output(18,True)
@@ -101,10 +107,7 @@ while True:
 		today = datetime.date.today()
 		log_file = "data-%d-%s.nbc" % (sid,today)
 		time.sleep(1)
-		if(switch_status == 1):
-			GPIO.output(22,True) # closed
-		else:
-			GPIO.output(22,False) # open
+	
 	except KeyboardInterrupt:
 		GPIO.cleanup()
 		quit()
