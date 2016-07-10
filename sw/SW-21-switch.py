@@ -63,7 +63,7 @@ def doorOpen(x):
 		GPIO.output(18,True)
 		p1 = time.time()
 		conn = httplib.HTTPConnection(ip_server)
-		t_req = "/index.php?appid=21&mid=1&name=%s&ip=%s&nsid=1&sid1=%d&dat1=1.0" % (meas_name,sxn_ipaddress,sid,switch_status)
+		t_req = "/index.php?appid=21&mid=1&name=%s&ip=%s&nsid=1&sid1=%d&dat1=%d" % (meas_name,sxn_ipaddress,sid,switch_status)
 		try:
 			conn.request("GET", t_req)
 			try:
@@ -82,7 +82,7 @@ def doorOpen(x):
 		GPIO.output(12,True)
 		with open(log_file, 'a') as out_file:
 			ts = datetime.datetime.fromtimestamp(t1).strftime('%H:%M:%S')
-			out_file.write("%s door_status: %d http: %.3f %s\n" % (ts,switch_status,dp))
+			out_file.write("%s door_status: %d http: %.3f\n" % (ts,switch_status,dp))
 			out_file.close()
 			GPIO.output(12,False)
 
