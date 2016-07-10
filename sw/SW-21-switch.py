@@ -33,6 +33,7 @@ dt = 0
 p1 = 0
 p2 = 0
 dp = 0
+switch_status = 0
 #==================================================
 # Configuration
 #==================================================
@@ -42,6 +43,7 @@ ip_server  = 'data.nabton.com'
 log_local  = 1
 log_server = 1
 meas_name  = 'your_switch'
+sw_delay = 60 # 60 seconds
 #==================================================
 GPIO.output(12,True)
 GPIO.output(18,True)
@@ -94,7 +96,7 @@ def doorOpen(x):
 		GPIO.output(12,True)
 		with open(log_file, 'a') as out_file:
 			ts = datetime.datetime.fromtimestamp(t1).strftime('%H:%M:%S')
-			out_file.write("%s door_status: %d http: %.3f\n" % (ts,switch_status,dp))
+			out_file.write("%s switch_status: %d http: %.3f\n" % (ts,switch_status,dp))
 			out_file.close()
 			GPIO.output(12,False)
 
@@ -107,7 +109,7 @@ while True:
 		today = datetime.date.today()
 		log_file = "data-%d-%s.nbc" % (sid,today)
 		doorOpen(1)
-		time.sleep(60)
+		time.sleep(sw_delay)
 	
 	except KeyboardInterrupt:
 		GPIO.cleanup()
