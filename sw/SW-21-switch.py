@@ -106,7 +106,8 @@ while True:
 	try:
 		today = datetime.date.today()
 		log_file = "data-%d-%s.nbc" % (sid,today)
-		time.sleep(1)
+		doorOpen(1)
+		time.sleep(60)
 	
 	except KeyboardInterrupt:
 		GPIO.cleanup()
