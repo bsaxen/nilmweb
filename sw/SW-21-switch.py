@@ -38,7 +38,7 @@ boti       = 100
 ip_server  = 'data.nabton.com'
 log_local  = 1
 log_server = 1
-meas_name  = 'garage_nytomta'
+meas_name  = 'your_switch'
 #==================================================
 os.system("ifconfig > ipaddress.work")
 file = open('ipaddress.work','r')
@@ -55,9 +55,9 @@ def doorOpen(x):
 	t1 = time.time()
 	dt = t1 - t2
 	if GPIO.input(16):
-		switch_status = 1 # Open
+		switch_status = 1 # Closed
 	else:
-		switch_status = 0 # Closed
+		switch_status = 0 # Open
 		
 	if log_server == 1:
 		GPIO.output(18,True)
