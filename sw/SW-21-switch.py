@@ -1,7 +1,7 @@
 #!/usr/bin/python
 #==================================================
 # SW-21-switch.py
-# 2016-07-08 
+# 2016-07-10 
 #==================================================
 import time
 import datetime
@@ -54,12 +54,16 @@ def doorOpen(x):
 	t2 = t1
 	t1 = time.time()
 	dt = t1 - t2
-
+	if GPIO.input(16):
+		switch_status = 1 # Open
+	else:
+		switch_status = 0 # Closed
+		
 	if log_server == 1:
 		GPIO.output(18,True)
 		p1 = time.time()
 		conn = httplib.HTTPConnection(ip_server)
-		t_req = "/index.php?appid=10&mid=1&name=%s&ip=%s&nsid=1&sid1=%d&dat1=1.0" % (app_id,meas_name,sxn_ipaddress,sid)
+		t_req = "/index.php?appid=21&mid=1&name=%s&ip=%s&nsid=1&sid1=%d&dat1=1.0" % (meas_name,sxn_ipaddress,sid,switch_status)
 		try:
 			conn.request("GET", t_req)
 			try:
@@ -78,13 +82,13 @@ def doorOpen(x):
 		GPIO.output(12,True)
 		with open(log_file, 'a') as out_file:
 			ts = datetime.datetime.fromtimestamp(t1).strftime('%H:%M:%S')
-			out_file.write("%s OPEN %.3f %s\n" % (ts,elpow,dp,nb_warning))
+			out_file.write("%s door_status: %d http: %.3f %s\n" % (ts,switch_status,dp))
 			out_file.close()
 			GPIO.output(12,False)
 
 #==================================================
 # Interrupt
-GPIO.add_event_detect(16, GPIO.FALLING, callback=doorOpen,bouncetime=boti)
+GPIO.add_event_detect(16, GPIO.BOTH, callback=doorOpen,bouncetime=boti)
 #==================================================
 while True:
 	try:
