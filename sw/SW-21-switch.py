@@ -13,7 +13,7 @@ GPIO.setmode(GPIO.BOARD)
 GPIO.setup(12, GPIO.OUT) # Write file led
 GPIO.setup(16, GPIO.IN, pull_up_down=GPIO.PUD_UP)
 GPIO.setup(18, GPIO.OUT) # HTTP req led
-GPIO-setup(22, GPIO.OUT)
+GPIO.setup(22, GPIO.OUT)
 #-------------------
 #	3.3		5.0	-------->to 3.3 v
 #	-		-	
