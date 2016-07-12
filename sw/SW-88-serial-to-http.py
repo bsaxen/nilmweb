@@ -1,7 +1,7 @@
 #!/usr/bin/python
 #==================================================
 # SW-88-serial-to-http.py
-# 2016-06-29
+# 2016-07-12
 #==================================================
 # apt-get install python-pip
 # pip install pyserial
@@ -69,7 +69,7 @@ while 1:
     if t_req:
         if sxn_debug == 'YES':
             print t_req
-        if '?' in t_req:   
+        if '/' in t_req:   
             url=t_req.split(":")
             if sxn_debug == 'YES':
                 print 'x'+url[0]+'xz'+url[1]+'z'
@@ -83,7 +83,6 @@ while 1:
                 if url[0][0] == '?' and cs == slen:
                     if nb == 2:
                         req = sxn_path + url[0] + '&ip=' +sxn_ipaddress
-                        req = req + '&name=' + sxn_name
                         if sxn_debug == 'YES':
                             print 'y'+req+'y'
                         conn = httplib.HTTPConnection(sxn_server)
