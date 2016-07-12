@@ -12,15 +12,15 @@ import os
 #==================================================
 # Read configuration
 #==================================================
-print 'Version 2016-06-17'
-sxn_debug = 'YES';
-sxn_server = '78.67.160.17'
-sxn_sercon = 'config.nabton.com'
+print 'Version 2016-07-12'
+sxn_debug = 'NO';
+sxn_server = 'data.nabton.com'
+#sxn_sercon = 'config.nabton.com'
 #sxn_server = '127.0.0.1'
-sxn_path = '/sxndata/index.php'
+#sxn_path = '/sxndata/index.php'
 sxn_device = 'ttyACM0'
 sxn_ipaddress = 'x.x.x.x'
-sxn_name = 'serial-to-http'
+#sxn_name = 'serial-to-http'
 #==================================================
 nb = 2
 dev_found = 0
@@ -82,7 +82,7 @@ while 1:
                     print ("len=%d cs=%d" % (slen, cs))
                 if url[0][0] == '?' and cs == slen:
                     if nb == 2:
-                        req = sxn_path + url[0] + '&ip=' +sxn_ipaddress
+                        req = url[0] + '&ip=' +sxn_ipaddress
                         if sxn_debug == 'YES':
                             print 'y'+req+'y'
                         conn = httplib.HTTPConnection(sxn_server)
