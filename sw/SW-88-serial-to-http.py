@@ -69,7 +69,7 @@ while 1:
     if t_req:
         if sxn_debug == 'YES':
             print t_req
-        if '/' in t_req:   
+        if '?' in t_req:   
             url=t_req.split(":")
             if sxn_debug == 'YES':
                 print 'x'+url[0]+'xz'+url[1]+'z'
