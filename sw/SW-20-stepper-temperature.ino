@@ -1,12 +1,18 @@
 //==================================================
 // SW-20-stepper-temperature.ino
+// 2016-07-22
 //==================================================
-int app_id = 20;
+int g_app_id = 20;
 //==================================================
 // Configuration
 //==================================================
-#define NFLOAT 2
-#define SIDN  2   // No of SIDs
+int g_debug               = 0;
+int g_device_delay        = 20;
+const char* g_clientName = "SW-20";
+const char* g_name = "x-stepper-temp";
+//==================================================
+#define NFLOAT 2  // No of decimals i float 
+#define SIDN  4   // No of SIDs
 #define SID1 1  
 #define SID2 2  
 #define SID3 3 
@@ -15,13 +21,15 @@ int app_id = 20;
 #define SID6 906
 #define SID7 907
 #define SID8 908
-int g_device_delay = 20;
-int g_debug = 0;
+
+#define greenLed  13
+#define yellowLed 12
+#define redLed     5
+
+int g_online = 0;
 //==================================================
-// This code supports 2 decimals only
-#define NFLOAT 2  // No of decimals i float value
 // Arduino states
-#define MAX_SID 10
+#define MAX_SID 8
 #define MAX_ORDERS 100
 int g_sids[10] = {SIDN,SID1,SID2,SID3,SID4,SID5,SID6,SID7,SID8};
 
@@ -67,7 +75,6 @@ int g_sids[10] = {SIDN,SID1,SID2,SID3,SID4,SID5,SID6,SID7,SID8};
 #include <OneWire.h>
 #include <DallasTemperature.h>
 #include <SoftwareSerial.h>
-//#include <IRremote.h>
 #include <U8glib.h>
 
 //=================================================
@@ -90,10 +97,10 @@ int SLEEP = 8;
 // OLED I2C
 //==================================================
 
-//U8GLIB_SSD1306_128X64 u8g(13, 11, 10, 9);// SW SPI protocol(4 pins): SCK = 13, MOSI = 11, CS = 10, A0 = 9	
+//U8GLIB_SSD1306_128X64 u8g(13, 11, 10, 9);// SW SPI protocol(4 pins): SCK = 13, MOSI = 11, CS = 10, A0 = 9 
 //U8GLIB_SSD1306_128X64 u8g(U8G_I2C_OPT_NONE); // Small display I2C protocol (2 pins)
 U8GLIB_SH1106_128X64 u8g(U8G_I2C_OPT_NONE); // Large display
-char dl[5][8],dm[5][8],dr[5][8];
+char dl[16][16],dm[16][16],dr[16][16];
 //=================================================
 void NB_oledDraw() 
 //=================================================
@@ -167,6 +174,20 @@ void draw()
 
 }
 //=================================================
+void blinkLed(int led,int number, int onTime)
+//================================================= 
+{
+  int i;
+  for(i=0;i<number;i++)
+  {
+    digitalWrite(led,HIGH);
+    delay(onTime);
+    digitalWrite(led,LOW);
+    delay(onTime);
+  }
+}
+
+//=================================================
 void NB_serialFlush()
 //=================================================
 {
@@ -176,16 +197,16 @@ void NB_serialFlush()
 }   
 
 //=================================================
-void NB_sendToGwy(int mid, int sid, float data, int other)
+int NB_sendToGwy(int mid, int sid, float data, int other)
 //=================================================
 {
   int ixSid = 0,i,negative=0;
   char msg1[100],msg2[50],checksum[20];
      strcpy(msg1," ");
      strcpy(msg2," ");
-     digitalWrite(5,HIGH);
+     digitalWrite(greenLed,HIGH);
      // Mandatory part of message
-     sprintf(msg1,"?mid=%d&nsid=%d&sid1=%d",mid,1,sid);
+     sprintf(msg1,"?name=%s&appid=%d&mid=%d&nsid=%d&sid1=%d",g_name,g_app_id,mid,1,sid);
 if(g_debug==1){Serial.print("data:");Serial.println(data);}      
      if(mid == NABTON_DATA)
      {
@@ -208,16 +229,16 @@ if(g_debug==1){Serial.print("part2:");Serial.println(part2);}
        if(negative == 0)
        {
          if(part2 < 10)
-           sprintf(msg2,"&devid=%d&swid=%d&dat1=%d.0%d",DEVID,SWID,part1,part2);
+           sprintf(msg2,"&dat1=%d.0%d",part1,part2);
          else 
-           sprintf(msg2,"&devid=%d&swid=%d&dat1=%d.%d",DEVID,SWID,part1,part2);
+           sprintf(msg2,"&dat1=%d.%d",part1,part2);
        }
        if(negative == 1)
        {
          if(part2 < 10)
-           sprintf(msg2,"&devid=%d&swid=%d&dat1=-%d.0%d",DEVID,SWID,part1,part2);
+           sprintf(msg2,"&dat1=-%d.0%d",part1,part2);
          else 
-           sprintf(msg2,"&devid=%d&swid=%d&dat1=-%d.%d",DEVID,SWID,part1,part2);
+           sprintf(msg2,"&dat1=-%d.%d",part1,part2);
        }
        strcat(msg1,msg2);
      }
@@ -228,7 +249,8 @@ if(g_debug==1){Serial.print("part2:");Serial.println(part2);}
      
      // Send meassage
      Serial.println(msg1);
-     digitalWrite(5,LOW);
+     digitalWrite(greenLed,LOW);
+    return(other);
 }
 //=================================================
 void recSerial()
@@ -240,50 +262,46 @@ void recSerial()
   int mid, sid;
   int dir,steps,vel;
   char rv[20];
- 
+  
   if (nx > 0) 
   {
-     digitalWrite(3, HIGH); 
+     g_online = 1;
+     digitalWrite(redLed,HIGH); 
      Serial.readBytes(nbbuff,nx);
-     sscanf(nbbuff,"%d",&sid);
- 
+     sscanf(nbbuff,"%d %d",&mid,&sid);
+     sprintf(dl[3],"%d",nx);
      if(sid == SID1) // Check if control sid correct
      {
-       strcpy(dr[3],"---");
-       strcpy(dr[4],"ok?");
-       if(strstr(nbbuff,"NBC_DEVICE_DELAY") != NULL)
+       if(strstr(nbbuff,"DELAY") != NULL)
        {
           strcpy(dr[3],"DLY");
-          sscanf(nbbuff,"%d %s %s %d",&sid,rv,command,&g_device_delay);
-          if(g_device_delay < 1)g_device_delay = 1;
-          if(g_device_delay > 3600)g_device_delay = 3600;
-          sprintf(dr[1],"%d",g_device_delay);
+          sscanf(nbbuff,"%d %d %s %d",&mid,&sid,command,&g_device_delay);
+          sprintf(dr[2],"%d",g_device_delay);
        }
+       NB_oledDraw();
        if(strstr(nbbuff,"NBC_STEPPER_CTRL") != NULL)
        {
-          strcpy(dr[3],"SCL");
+          strcpy(dl[3],"SCL");
           sscanf(nbbuff,"%d %s %s %d %d %d",&sid,rv,command,&dir,&steps,&vel);
-          sprintf(dr[2],"%d",dir);
-          if(dir==1)strcpy(dr[4],"STP>");
-          if(dir==2)strcpy(dr[4],"STP<"); 
-          //if(dir==1)strcpy(dr[1],"hi");
-          //if(dir==2)strcpy(dr[1],"low<");   
+          sprintf(dm[3],"%d",dir);
+          if(dir==1)strcpy(dr[3],"STP>");
+          if(dir==2)strcpy(dr[3],"STP<"); 
           NB_oledDraw();        
           if(steps > 0 || steps < 1000)
           {
              if(dir == 1) stepCW(steps,vel);
              if(dir == 2) stepCCW(steps,vel);
           }
-       }
-       strcpy(dr[4],"ok!");
-       NB_oledDraw();
+          strcpy(dr[3],"-");
+        }
+        NB_oledDraw();
      }
-     digitalWrite(3, LOW); 
-  }
+     digitalWrite(redLed,LOW);
+  } 
   else
-    strcpy(dr[4],"nok");
+         g_online = 0;
 
-  NB_oledDraw();
+  NB_oledDraw();   
 }
 
 //=================================================
@@ -308,8 +326,18 @@ void setup()
   String str;
   Serial.begin(9600);
   NB_serialFlush();
-  pinMode(3, OUTPUT);
-  pinMode(5, OUTPUT);
+  pinMode(greenLed,          OUTPUT);
+  pinMode(redLed,            OUTPUT);
+  pinMode(yellowLed,         OUTPUT);
+
+  digitalWrite(greenLed,  HIGH); //Device ON
+  digitalWrite(redLed,    HIGH); //Message received
+  digitalWrite(yellowLed, HIGH); //Message sent
+  delay(500);
+  digitalWrite(greenLed,  LOW); //Device ON
+  digitalWrite(redLed,    LOW); //Message received
+  digitalWrite(yellowLed, LOW); //Message sent
+  
   pinMode(DIR, OUTPUT);
   pinMode(STEP, OUTPUT);
   pinMode(SLEEP, OUTPUT);
@@ -337,6 +365,7 @@ void setup()
 
   sensors.begin();
   nsensors = sensors.getDeviceCount();
+  
   if(nsensors > 0)
   {
     for(i=0;i<nsensors;i++)
@@ -346,13 +375,6 @@ void setup()
     }
   }
 
-  sensors.requestTemperatures();
-  for(i=1;i<=nsensors;i++)
-  {
-      tempC = sensors.getTempC(device[i-1]);    
-      str = String(tempC);
-      str.toCharArray(dl[i],8); 
-  }
   g_sids[1] = SID1;
   g_sids[2] = SID2;
   g_sids[3] = SID3;
@@ -362,15 +384,6 @@ void setup()
   g_sids[7] = SID7;
   g_sids[8] = SID8;
 
-  sprintf(dr[1],"%d",g_device_delay);
-  //sprintf(dr[2],"");
-  //sprintf(dr[3],"");
-  for(i=1;i<=SIDN;i++)
-  {
-    sprintf(dm[i],"%d",g_sids[i]);
-  }
-
-  NB_oledDraw();
 }
 
 //=================================================
@@ -380,23 +393,36 @@ void loop()
   int i;
   float tempC;
   String str;
+
+  sprintf(dr[1],"%2d",nsensors);
+  strcpy(dl[1],g_clientName); 
+  strcpy(dl[3],"-");
+  strcpy(dm[3],"-");
+  strcpy(dr[3],"-");
+  if(g_online == 0)strcpy(dr[4],"OFF");
+  if(g_online == 1)strcpy(dr[4]," ON");
+  NB_oledDraw();
   
     sensors.requestTemperatures();
-    for(i=1;i<=nsensors;i++)
+    for(i=0;i<nsensors;i++)
     {
-      strcpy(dl[i]," ");  
-      tempC = sensors.getTempC(device[i-1]);     
-      str = String(tempC);
-      str.toCharArray(dl[i],8); 
-      if(tempC != -127)NB_sendToGwy(NABTON_DATA,g_sids[i],tempC,0);
-      strcpy(dm[i],"*");
+      sprintf(dl[4],"%3d",g_sids[i+1]);
+      tempC = sensors.getTempCByIndex(i);
+      dtostrf(tempC,5, NFLOAT, dm[4]);
+      if(tempC != -127)i = NB_sendToGwy(NABTON_DATA,g_sids[i+1],tempC,i);
+      strcpy(dr[3],"->");
       NB_oledDraw();
-      delay(2000);  
+      delay(2000);
+      strcpy(dr[3],"<-");  
       recSerial();
-      sprintf(dm[i],"%d",g_sids[i]);
+      //sprintf(dl[4],"%3d",g_sids[i+1]);
       NB_oledDraw();
+      strcpy(dr[3],"  "); 
     }
+    delay(5000);
+    clearOled();
+    sprintf(dm[2],"%3d",g_device_delay);
+    NB_oledDraw();
     delay(g_device_delay*1000); // delay in steps of seconds   
 }
 // End of file
-
