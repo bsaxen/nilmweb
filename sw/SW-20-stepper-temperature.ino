@@ -1,6 +1,6 @@
 //==================================================
 // SW-20-stepper-temperature.ino
-// 2016-07-22
+// 2016-07-29
 //==================================================
 int g_app_id = 20;
 //==================================================
@@ -396,6 +396,7 @@ void loop()
 
   sprintf(dr[1],"%2d",nsensors);
   strcpy(dl[1],g_clientName); 
+  strcpy(dm[2],"    ");
   strcpy(dl[3],"-");
   strcpy(dm[3],"-");
   strcpy(dr[3],"-");
@@ -421,7 +422,8 @@ void loop()
     }
     delay(5000);
     clearOled();
-    sprintf(dm[2],"%3d",g_device_delay);
+    if(g_online == 0)sprintf(dm[2],"! %2d",g_device_delay);
+    if(g_online == 1)sprintf(dm[2],"* %2d",g_device_delay);
     NB_oledDraw();
     delay(g_device_delay*1000); // delay in steps of seconds   
 }
