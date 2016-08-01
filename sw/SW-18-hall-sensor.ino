@@ -1,5 +1,10 @@
+//==================================================
+// SW-18-hall-sensor.ino
+// 2016-08-01
+//==================================================
+int g_app_id = 18;
+//==================================================
 #include <U8glib.h>
-
 
 int limit = 512;
 U8GLIB_SH1106_128X64 u8g(U8G_I2C_OPT_NONE); // Large display
@@ -41,8 +46,8 @@ void draw()
   u8g.drawStr( 0, 62, dl[4]);
 
   u8g.drawStr( 45, 10, dm[1]);
-  u8g.drawStr( 99, 27, dm[2]);
-  u8g.drawStr( 99, 45, dm[3]);
+  u8g.drawStr( 45, 27, dm[2]);
+  u8g.drawStr( 45, 45, dm[3]);
   u8g.drawStr( 45, 62, dm[4]);
 
   u8g.drawStr( 100, 10, dr[1]);
@@ -51,12 +56,14 @@ void draw()
   u8g.drawStr( 100, 62, dr[4]);  
 
 }
-void setup() {
+//=================================================
+void setup() 
+//=================================================
+{
   int x,i;
 pinMode(8, OUTPUT);
 pinMode(9, OUTPUT);
 pinMode(10, OUTPUT);
-  //Serial.begin(9600);
 
   for(i=1;i<100;i++)
   {
@@ -64,8 +71,6 @@ pinMode(10, OUTPUT);
     delay(10);
     limit = x;
   }
-  //Serial.print(limit); Serial.print(" ");
-  //Serial.println(x);
   
   if ( u8g.getMode() == U8G_MODE_R3G3B2 ) {
     u8g.setColorIndex(255);     // white
@@ -80,20 +85,34 @@ pinMode(10, OUTPUT);
     u8g.setHiColorByRGB(255,255,255);
   }
   clearOled();
+  strcpy(dl[1],"Volvo Amazon"); 
+  NB_oledDraw();
 }
 
-long t1,t2,dt;
+long t1,t2;
+int dt;
 int sig = 0;
-void loop() {
+int counter = 0;
+int freq;
 
+int xmin = 999;
+int xmax = 0;
+int ss;
+int sensitivity = 5;
+//=================================================
+void loop() 
+//=================================================
+{
+  counter++;
   int x = analogRead(A0);
-  int delta = x - limit;
+  //int delta = x - limit;
+  if(xmax < x)xmax = x;
+  if(xmin > x)xmin = x;
 
- if(x > limit + 8) 
+ if(x > xmax - sensitivity) 
  {
   digitalWrite(8,HIGH);
-  digitalWrite(9,LOW);
-  digitalWrite(10,LOW);
+  //digitalWrite(10,LOW);
   if(sig == 0)
   {
   t2 = t1;
@@ -102,25 +121,40 @@ void loop() {
   sig = 1;
   }
  }
- else if(x < limit-8) 
+ else if(x < xmin + sensitivity) 
  {
   digitalWrite(8,LOW);
-  digitalWrite(9,LOW);
-  digitalWrite(10,HIGH);
+  //digitalWrite(10,HIGH);
+    sig = 0;
  }
- else
- {
-  digitalWrite(8,LOW);
-  digitalWrite(9,HIGH);
-  digitalWrite(10,LOW);
-  sig = 0;
- }
-  //Serial.print(x); Serial.print(" ");
-  //Serial.print(limit); Serial.print(" ");
-  //Serial.println(delta);
-  sprintf(dl[4],"%3d",delta);
-    sprintf(dl[3],"%d",dt);
-  NB_oledDraw();
-  //delay(10); 
-  //limit = limit + (x-limit)*0.0001;
+
+
+  if(counter == 10000)
+  {
+    //sprintf(dl[2],"min=%d",xmin);
+    //sprintf(dm[2],"max=%d",xmax);
+    ss = xmax - xmin;
+    if(ss <= 2*sensitivity)
+    {
+      strcpy(dl[2],"signal = no");
+      digitalWrite(10,HIGH);
+    }
+    else
+    {
+      sprintf(dl[2],"signal=%d",ss);
+      digitalWrite(10,LOW);
+    }
+    freq = 1000/dt;
+    sprintf(dl[3],"freq=%d",freq);
+    digitalWrite(8,LOW);
+    digitalWrite(9,HIGH);
+    
+    NB_oledDraw();
+    counter = 0;
+    xmin = 999;
+    xmax = 0;
+    digitalWrite(9,LOW);
+  }
+  
+  
 }
