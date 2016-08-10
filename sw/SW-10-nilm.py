@@ -1,7 +1,7 @@
 #!/usr/bin/python
 #==================================================
 # SW-10-nilm.py
-# 2016-04-29 
+# 2016-08-10 
 #==================================================
 import time
 import datetime
@@ -57,11 +57,14 @@ def pulseEvent(x):
 	dt = t1 - t2
 	elpow = 3600/dt
 
-	if log_server == 1:
+	if log_server > 0:
 		GPIO.output(18,True)
 		p1 = time.time()
 		conn = httplib.HTTPConnection(ip_server)
-		t_req = "/sxndata/index.php?appid=10&mid=1&name=%s&ip=%s&nsid=1&sid1=%d&dat1=%.2f" % (app_id,meas_name,sxn_ipaddress,sid,elpow)
+		if log_server == 1:
+			t_req = "/sxndata/index.php?appid=10&mid=1&name=%s&ip=%s&nsid=1&sid1=%d&dat1=%.2f" % (app_id,meas_name,sxn_ipaddress,sid,elpow)
+		if log_server == 2:
+			t_req = "/index.php?name=%s&ip=%s&sid=%d&dat=%.2f" % (meas_name,sxn_ipaddress,sid,elpow)
 		try:
 			conn.request("GET", t_req)
 			try:
