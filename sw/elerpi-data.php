@@ -26,9 +26,7 @@ function logData($sid,$data)
 if(isset($_GET['sid']))
 {
     $sid    = $_GET["sid"];
-    $name   = $_GET["name"];
-    $ip     = $_GET["ip"];
-    $data   = $_GET["dat"];
+    $data   = $_GET["data"];
     logData($sid,$data);
 }
 
