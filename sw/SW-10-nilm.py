@@ -64,7 +64,7 @@ def pulseEvent(x):
 		if log_server == 1:
 			t_req = "/sxndata/index.php?appid=10&mid=1&name=%s&ip=%s&nsid=1&sid1=%d&dat1=%.2f" % (app_id,meas_name,sxn_ipaddress,sid,elpow)
 		if log_server == 2:
-			t_req = "/index.php?name=%s&ip=%s&sid=%d&dat=%.2f" % (meas_name,sxn_ipaddress,sid,elpow)
+			t_req = "/elerpi-data.php?sid=%d&data=%.2f" % (sid,elpow)
 		try:
 			conn.request("GET", t_req)
 			try:
