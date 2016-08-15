@@ -1,7 +1,7 @@
 #!/usr/bin/python
 #==================================================
 # SW-10-nilm.py
-# 2016-08-10 
+# 2016-08-15 
 #==================================================
 import time
 import datetime
@@ -62,7 +62,7 @@ def pulseEvent(x):
 		p1 = time.time()
 		conn = httplib.HTTPConnection(ip_server)
 		if log_server == 1:
-			t_req = "/sxndata/index.php?appid=10&mid=1&name=%s&ip=%s&nsid=1&sid1=%d&dat1=%.2f" % (app_id,meas_name,sxn_ipaddress,sid,elpow)
+			t_req = "/sxndata/index.php?appid=10&mid=1&name=%s&ip=%s&nsid=1&sid1=%d&dat1=%.2f" % (meas_name,sxn_ipaddress,sid,elpow)
 		if log_server == 2:
 			t_req = "/elerpi-data.php?sid=%d&data=%.2f" % (sid,elpow)
 		try:
