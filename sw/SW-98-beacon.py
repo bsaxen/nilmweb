@@ -9,7 +9,7 @@ import os
 #==================================================
 # Read configuration
 #==================================================
-print 'Version 2016-04-21'
+print 'Version 2016-08-18'
 g_debug     = 'YES';
 g_server    = '78.67.160.17'
 g_sercon    = 'config.nabton.com'
@@ -26,6 +26,9 @@ for line in file:
         work=words[11].split(':')
         g_ipaddress = work[1] 
         print 'local ipaddress ' + g_ipaddress
+        split_ip = g_ipaddress.split('.')
+        last_ip = split_ip[4]
+        print 'last ip: ' + last_ip
 
 req = g_path+ '?mid=5'+'&appid=98'+'&ip=' + g_ipaddress + '&name=' + g_name  
      
