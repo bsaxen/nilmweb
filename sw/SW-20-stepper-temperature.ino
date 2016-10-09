@@ -7,9 +7,9 @@ int g_app_id = 20;
 // Configuration
 //==================================================
 int g_debug               = 0;
-int g_device_delay        = 20;
+int g_device_delay        = 30;
 const char* g_clientName = "SW-20";
-const char* g_name = "x-stepper-temp";
+const char* g_name = "test-stepper-temp";
 //==================================================
 #define NFLOAT 2  // No of decimals i float 
 #define SIDN  4   // No of SIDs
@@ -29,9 +29,9 @@ const char* g_name = "x-stepper-temp";
 int g_online = 0;
 //==================================================
 // Arduino states
-#define MAX_SID 8
+#define MAX_SID 4
 #define MAX_ORDERS 100
-int g_sids[10] = {SIDN,SID1,SID2,SID3,SID4,SID5,SID6,SID7,SID8};
+int g_sids[5] = {SIDN,SID1,SID2,SID3,SID4};
 
 
 // Arduino-RPi protocol
@@ -74,7 +74,7 @@ int g_sids[10] = {SIDN,SID1,SID2,SID3,SID4,SID5,SID6,SID7,SID8};
 //==================================================
 #include <OneWire.h>
 #include <DallasTemperature.h>
-#include <SoftwareSerial.h>
+//#include <SoftwareSerial.h>
 #include <U8glib.h>
 
 //=================================================
@@ -100,7 +100,7 @@ int SLEEP = 8;
 //U8GLIB_SSD1306_128X64 u8g(13, 11, 10, 9);// SW SPI protocol(4 pins): SCK = 13, MOSI = 11, CS = 10, A0 = 9 
 //U8GLIB_SSD1306_128X64 u8g(U8G_I2C_OPT_NONE); // Small display I2C protocol (2 pins)
 U8GLIB_SH1106_128X64 u8g(U8G_I2C_OPT_NONE); // Large display
-char dl[16][16],dm[16][16],dr[16][16];
+char dl[4][16],dm[4][16],dr[4][16];
 //=================================================
 void NB_oledDraw() 
 //=================================================
@@ -258,41 +258,57 @@ void recSerial()
 {
   int i,k=0,ttemp,nx=0,nm=0;
   nx = Serial.available();
-  char nbbuff[50],msg[5][100],command[48],stemp[100];
-  int mid, sid;
+  char nbbuff[50],cmd1[32],cmd2[32];
+  int mid, sid,error=0;
   int dir,steps,vel;
   char rv[20];
-  
+
   if (nx > 0) 
   {
      g_online = 1;
      digitalWrite(redLed,HIGH); 
      Serial.readBytes(nbbuff,nx);
-     sscanf(nbbuff,"%d %d",&mid,&sid);
+     sscanf(nbbuff,"%d",&sid);
      sprintf(dl[3],"%d",nx);
      if(sid == SID1) // Check if control sid correct
      {
        if(strstr(nbbuff,"DELAY") != NULL)
        {
           strcpy(dr[3],"DLY");
-          sscanf(nbbuff,"%d %d %s %d",&mid,&sid,command,&g_device_delay);
+          sscanf(nbbuff,"%d %s %s %s %d %d %d",&sid,rv,cmd1,cmd2,&g_device_delay);
           sprintf(dr[2],"%d",g_device_delay);
        }
        NB_oledDraw();
        if(strstr(nbbuff,"NBC_STEPPER_CTRL") != NULL)
        {
           strcpy(dl[3],"SCL");
-          sscanf(nbbuff,"%d %s %s %d %d %d",&sid,rv,command,&dir,&steps,&vel);
-          sprintf(dm[3],"%d",dir);
-          if(dir==1)strcpy(dr[3],"STP>");
-          if(dir==2)strcpy(dr[3],"STP<"); 
-          NB_oledDraw();        
-          if(steps > 0 || steps < 1000)
+          sscanf(nbbuff,"%d %s %s %s %d %d %d",&sid,rv,cmd1,cmd2,&dir,&steps,&vel);
+          if(dir != 1 && dir != 2)
           {
-             if(dir == 1) stepCW(steps,vel);
-             if(dir == 2) stepCCW(steps,vel);
+            sprintf(dl[2],"%d",dir);
+            error = 1;
           }
-          strcpy(dr[3],"-");
+          if(steps < 1 || steps > 1000)
+          {
+            sprintf(dm[2],"%d",steps);
+            error = 1;
+          }
+          if(vel < 1 || vel > 100)
+          {
+            sprintf(dr[2],"%d",vel);
+            error = 1;
+          }
+          if(error == 0)
+          {
+            sprintf(dm[3],"%d",dir);
+            if(dir==1)strcpy(dr[3],"STP>");
+            if(dir==2)strcpy(dr[3],"STP<"); 
+            NB_oledDraw();
+            delay(1000);        
+            if(dir == 1) stepCW(steps,vel);
+            if(dir == 2) stepCCW(steps,vel);
+            strcpy(dr[3]," ");
+          }
         }
         NB_oledDraw();
      }
@@ -379,13 +395,10 @@ void setup()
   g_sids[2] = SID2;
   g_sids[3] = SID3;
   g_sids[4] = SID4;
-  g_sids[5] = SID5;
-  g_sids[6] = SID6;
-  g_sids[7] = SID7;
-  g_sids[8] = SID8;
 
 }
 
+int tp = 0;
 //=================================================
 void loop()
 //=================================================
@@ -393,13 +406,14 @@ void loop()
   int i;
   float tempC;
   String str;
-
+  tp++;
+  if(tp > 4)tp = 1;
   sprintf(dr[1],"%2d",nsensors);
   strcpy(dl[1],g_clientName); 
   strcpy(dm[2],"    ");
-  strcpy(dl[3],"-");
-  strcpy(dm[3],"-");
-  strcpy(dr[3],"-");
+  strcpy(dl[3]," ");
+  strcpy(dm[3]," ");
+  strcpy(dr[3]," ");
   if(g_online == 0)strcpy(dr[4],"OFF");
   if(g_online == 1)strcpy(dr[4]," ON");
   NB_oledDraw();
@@ -416,14 +430,13 @@ void loop()
       delay(2000);
       strcpy(dr[3],"<-");  
       recSerial();
-      //sprintf(dl[4],"%3d",g_sids[i+1]);
       NB_oledDraw();
       strcpy(dr[3],"  "); 
     }
     delay(5000);
     clearOled();
-    if(g_online == 0)sprintf(dm[2],"! %2d",g_device_delay);
-    if(g_online == 1)sprintf(dm[2],"* %2d",g_device_delay);
+    if(g_online == 0)sprintf(dm[tp],"! %2d",g_device_delay);
+    if(g_online == 1)sprintf(dm[tp],"* %2d",g_device_delay);
     NB_oledDraw();
     delay(g_device_delay*1000); // delay in steps of seconds   
 }
