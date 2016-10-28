@@ -1,142 +1,110 @@
-//==================================================
-// SW-13-ESP8266-nilm.ino
-// 2016-04-05
-//==================================================
-#include <ESP8266WiFi.h>
-const char* ssid     = "???";
-const char* password = "???";
-const char* host = "server ip address";
-const char* clientName = "SW-13";
-IPAddress ipAddress;
+//============================================
+// main.cpp
+// SW-13-ESP12E-nilm.ino
+// 2016-10-08
+//============================================
+#include "nabton/NabtonClient.h"
+#include "../config/configuration.h"
 
-const int PIN_INTERRUPT  = 4;
-const int PIN_LED_PULSE  = 5;
-const int PIN_LED_STATUS = 14;
+//Add the modules you want to use
+//#include "nabton/GpsModule.h"
 
-unsigned long time1, time2, data;
-//==================================================
-#define SWID 2015
-#define DEVID 1218 
-#define SIDN  1   // No of SIDs
-#define SID1 901  
-#define SID2 902  
-#define SID3 903 
-#define SID4 904 
-#define SID5 905  
-#define SID6 906
-#define SID7 907
-#define SID8 908
-int g_device_delay = 20;
-int g_debug = 0;
-int app_id = 13;
-//==================================================
-// This code supports 2 decimals only
-#define NFLOAT 2  // No of decimals i float value
-// Arduino states
-#define MAX_SID 10
-#define MAX_ORDERS 100
-int g_sids[10] = {SIDN,SID1,SID2,SID3,SID4,SID5,SID6,SID7,SID8};
+using namespace nabton;
+NabtonClient* nabtonClient;
 
-// Arduino-RPi protocol
-#define NABTON_DATA     1 
-#define NABTON_LATEST   2 
-#define NABTON_MAILBOX  3 
-volatile int g_sendData = LOW;
-volatile int g_watt;
-char g_sIp[40];
-//=================================================
-void NB_sendFloatData(int sid, float value)
-//=================================================
+#ifdef D_ESP8266
+    ADC_MODE(ADC_VCC);
+#endif
+
+double* data_ = NULL;
+int nSids_;
+
+// CUSTOM variables here
+//const byte httpLed = 2;
+//const byte measLed = 3;
+//const byte interruptPin = 0;
+
+const byte httpLed = 12;
+const byte measLed = 13;
+const byte interruptPin = 14;
+// - END OF - CUSTOM variables
+
+int timeToCheckStatus = 0;
+unsigned long t1,t2,dt;
+float elpow = 0.0;
+int ledOn = 1;
+
+void measure()
 {
-
-    char sValue[15];
-    digitalWrite(PIN_LED_STATUS,HIGH);
-    dtostrf(value,7, NFLOAT, sValue);
- 
-    WiFiClient client;
-    const int httpPort = 80;
-    if (!client.connect(host, httpPort)) {
-      Serial.println("connection failed");
-      return;
-    }
- 
-    String urlPath        = "/sxndata/index.php";
-    String arduinoSim     = "?sw="+String(app_id)+"&mid=1&nsid="+String(SIDN)+"&sid1="+String(sid)+"&dat1="+String(sValue);
-    String nameString     = "&name=" + String(clientName);;
-    String ipString       = "&ip=" + String(g_sIp);
- 
-    client.print(String("GET ") + urlPath + arduinoSim + nameString + ipString + " HTTP/1.1\r\n" +
-                 "Host: " + host + "\r\n" +
-                 "Connection: close\r\n\r\n");
-    delay(10);
-//    while(client.available()){
-//      String line = client.readStringUntil('\r');
-//      if(g_debug == 1)Serial.print(line);
-//      // TBD receive SID mail
-//    }
-    
-    digitalWrite(PIN_LED_STATUS,LOW);
-} 
-//======================================
-void pulse()
-//======================================
-{ 
-      time2 = time1;
-      time1 = millis();
-      data = time1 - time2;
-      if(data < 100)
-      {
-        time1 = time2;
-        return;
-      }
-      float watt = 3600.0/data*1000.0;
-      digitalWrite(PIN_LED_PULSE,HIGH);
-      digitalWrite(PIN_LED_PULSE,LOW);
-      g_watt = watt;
-      g_sendData = HIGH;
+    ledOn++;
+    if(ledOn > 1)ledOn = 0;
+    if(ledOn==1)digitalWrite(measLed,LOW);
+    if(ledOn==0)digitalWrite(measLed,HIGH);
+    t2 = t1;
+    t1 = millis();
+    dt = t1 - t2;
+    elpow = 3600./dt*1000.;
 }
-//==================================================
+
+
+
 void setup() {
-//==================================================
 
-  pinMode(PIN_LED_PULSE, OUTPUT);
-  pinMode(PIN_LED_STATUS, OUTPUT);
-  pinMode(PIN_INTERRUPT, INPUT); 
+    pinMode(httpLed, OUTPUT);
+    pinMode(measLed, OUTPUT);
+    pinMode(interruptPin, INPUT_PULLUP);
+    digitalWrite(httpLed,LOW);
+    digitalWrite(measLed,LOW);
 
-  
-  Serial.begin(115200);
 
-  Serial.println();
-  Serial.print("Connecting to ");
-  Serial.println(ssid);
-  
-  WiFi.begin(ssid, password);
-  
-  while (WiFi.status() != WL_CONNECTED) {
-    delay(500);
-    Serial.print(".");
-  }
+       nabtonClient = new NabtonClient(CONFIG_APPLICATION_NAME, CONFIG_CLIENT_TYPE);
+  //     //Initialize serial support
+  //     Serial.begin(CONFIG_BAUDRATE);
+  //     delay(100);
+  //     //Initialize wifi support
+       WifiManager::getInstance(CONFIG_SSID, CONFIG_SSID_PP, CONFIG_BROKER_IP,
+                                CONFIG_BROKER_PORT, CONFIG_HOST, CONFIG_HOST_PORT,
+                                CONFIG_LOW_POWER_MODE);
 
-  Serial.println("");
-  Serial.println("WiFi connected");  
-  Serial.println("IP address: ");
-  ipAddress = WiFi.localIP();
-  Serial.println(ipAddress);
-  sprintf(g_sIp,"%d.%d.%d.%d", ipAddress[0],ipAddress[1],ipAddress[2],ipAddress[3]);
+       digitalWrite(httpLed,HIGH);
+       delay(300);
+       digitalWrite(httpLed,LOW);
+       delay(300);
+       digitalWrite(httpLed,HIGH);
+       delay(300);
+       digitalWrite(httpLed,LOW);
+       delay(300);
+       digitalWrite(httpLed,HIGH);
+       delay(300);
+       digitalWrite(httpLed,LOW);
+       delay(3000);
 
-  attachInterrupt(digitalPinToInterrupt(PIN_INTERRUPT), pulse, FALLING);
-  
-  digitalWrite(PIN_LED_PULSE,LOW);
-  digitalWrite(PIN_LED_STATUS,LOW);
+       nSids_ = sizeof(CONFIG_SIDS)/sizeof(CONFIG_SIDS[0]);
+       data_ = new double[nSids_];
+  //
+  //     // ########################################################################
+  //     //    Now you have the basics all set up. Send logs to your computer either
+  //     //    over Serial or WifiManager.
+  //     // ########################################################################
+  //     //ULOG_DEBUG << "This is a debug message over serial port";
+  //     //WLOG_DEBUG << "This is a debug message over wifi";
+  //
+  // MID = 3 MAILBOX
+  //nabtonClient->sendNabtonDataPackage(CONFIG_APPLICATION_ID,3,1,(int*)CONFIG_SIDS,data_);
+  attachInterrupt(interruptPin, measure, FALLING);
 }
 
-int count=0;
-//==================================================
 void loop() {
-//==================================================
-    if(g_sendData == HIGH)
-    {
-      g_sendData = LOW;
-      NB_sendFloatData(SID1, g_watt);
-    }
+      timeToCheckStatus++;
+      // Check every 10s. Monitors Wifi connection and more. Reconnects if lost
+      if(timeToCheckStatus == (int)(10000/CONFIG_REPORT_FREQUENCY_MILLISECONDS))
+      {
+        timeToCheckStatus = 0;
+        nabtonClient->updateStatus();
+      }
+      delay(CONFIG_REPORT_FREQUENCY_MILLISECONDS);
+      digitalWrite(httpLed,HIGH);
+      data_[0] = double(elpow);
+      nabtonClient->sendNabtonDataPackage(CONFIG_APPLICATION_ID,1,1,(int*)CONFIG_SIDS,data_,false);
+      digitalWrite(httpLed,LOW);
 }
