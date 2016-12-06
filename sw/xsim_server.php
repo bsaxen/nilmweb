@@ -2,9 +2,9 @@
 // houseRpi-server.response
 // server-houseRpi.order
 
-$x_from = $_GET['x_from']; // From client Id
-$x_to   = $_GET['x_to']; // To client Id
-$x_msg  = $_GET['x_msg']; // Transaction Message type: 1 = any orders for me?, 2 = answer on latest order
+$x_from = $_GET['from']; // From client Id
+$x_to   = $_GET['to']; // To client Id
+$x_msg  = $_GET['msg']; // Transaction Message type: 1 = any orders for me?, 2 = answer on latest order
 
 function saveAnswer($from,$to,$answer)
 {
