@@ -7,10 +7,11 @@
 import time
 import httplib
 import os
-g_server    = 'x.x.x.x'
-g_path      = '/sxndata/index.php'
+g_client_name = 'houseRPi'
+g_server      = 'x.x.x.x'
+g_path      = '/xsim/xsim_server.php'
 g_delay     = 10
-
+g_any = g_path+ "?msg=1&from=%s&to=browser" % (g_client_name) 
 while 1:
 	conn = httplib.HTTPConnection(g_server)
 	try:
@@ -18,13 +19,15 @@ while 1:
 		try:
 			r1 = conn.getresponse()
 			if g_debug == 'YES':
-          print ("Server Response:-_- %s %s " % (r1.status, r1.reason))
-        data1 = r1.read()
-        os.system(data1);
-    except:
-        print '-_- No response from server'
-  except:
-      print '-_- Not able to connect to server '+g_server
-  conn.close()
-  time.sleep(g_delay)
+                	print ("Server Response:-_- %s %s " % (r1.status, r1.reason))
+        		data1 = r1.read()
+			# check if data1 has any order
+			xsys = datat1 + '> res.txt'
+        		os.system(xsys);
+                except:
+        		print '-_- No response from server'
+        except:
+        print '-_- Not able to connect to server '+g_server
+        conn.close()
+        time.sleep(g_delay)
 # End of file
