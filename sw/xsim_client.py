@@ -11,7 +11,7 @@ g_client_name = 'houseRPi'
 g_server      = 'x.x.x.x'
 g_path      = '/xsim/xsim_server.php'
 g_delay     = 10
-g_any = g_path+ "?msg=question&from=%s" % (g_client_name) 
+g_any = g_path+ "?msg=1&from=%s" % (g_client_name) 
 while 1:
 	conn = httplib.HTTPConnection(g_server)
 	try:
